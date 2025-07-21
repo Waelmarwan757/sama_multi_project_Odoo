@@ -58,6 +58,7 @@
         'views/hr_payslip_line_views.xml',
         'views/hr_employee_views.xml',
         'views/hr_payslip_run_views.xml',
+        'views/hr_work_entry_types.xml',
         'views/res_config_settings_views.xml',
     ],
     'demo': ['data/hr_payroll_community_demo.xml'],

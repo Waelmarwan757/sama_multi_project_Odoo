@@ -20,6 +20,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
 from datetime import date, datetime, time
 from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, tools, _
@@ -30,6 +31,7 @@ import babel
 # This will generate 16th of days
 ROUNDING_FACTOR = 16
 
+_logger = logging.getLogger(__name__)
 
 class HrPayslip(models.Model):
     """Create new model for getting total Payroll Sheet for an Employee"""
@@ -256,12 +258,13 @@ class HrPayslip(models.Model):
                             multi_leaves.append(each.holiday_id)
                 else:
                     holiday = leave.holiday_id
+                    work_entry_type = leave.work_entry_type_id # add work_entry_type for generic use
                     current_leave_struct = leaves.setdefault(
                         holiday.holiday_status_id, {
-                            'name': holiday.holiday_status_id.name or _(
+                            'name': holiday.holiday_status_id.name or work_entry_type.name or _(
                                 'Global Leaves'),
                             'sequence': 5,
-                            'code': holiday.holiday_status_id.code or 'GLOBAL',
+                            'code': holiday.holiday_status_id.code or work_entry_type.code or 'GLOBAL',
                             'number_of_days': 0.0,
                             'number_of_hours': 0.0,
                             'contract_id': contract.id,
@@ -593,6 +596,7 @@ class HrPayslip(models.Model):
 
     @api.onchange('employee_id', )
     def onchange_employee(self):
+        _logger.info("onchange_employee triggered for employee_id=%s, date_from=%s, date_to=%s", self.employee_id.id if self.employee_id else None, self.date_from, self.date_to)
         """Function for getting contract for employee"""
         if (not self.employee_id) or (not self.date_from) or (not self.date_to):
             return
