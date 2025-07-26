@@ -56,6 +56,16 @@ class HrPayslipRun(models.Model):
                                       "payslips generated from here are refund"
                                       "payslips.")
 
+    payslip_count = fields.Integer(compute='_compute_payslip_count',
+                                   string="Payslip Computation Details",
+                                   help="Set Payslip Count")
+
+    def _compute_payslip_count(self):
+        """Function to compute payslip count"""
+        for payslip_run in self:
+            payslip_run.payslip_count = self.env['hr.payslip'].search_count(
+                [('payslip_run_id', '=', payslip_run.id)])
+
     def action_payslip_run(self):
         """Function for state change"""
         return self.write({'state': 'draft'})
@@ -63,3 +73,11 @@ class HrPayslipRun(models.Model):
     def close_payslip_run(self):
         """Function for state change"""
         return self.write({'state': 'close'})
+
+    def action_view_payslips(self):
+        """Function to view payslips in batch"""
+        action = self.env.ref('hr_payroll_community.action_hr_payslip_line').read()[0]
+        action['domain'] = [('slip_id.payslip_run_id', '=', self.id)]
+        action['context'] = {'create': False}
+        action['view_mode'] = 'pivot,form'
+        return action

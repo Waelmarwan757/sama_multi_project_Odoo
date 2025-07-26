@@ -89,6 +89,16 @@
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_payslips"
+                                class="oe_stat_button"
+                                icon="fa-money"
+                                type="object">
+                            <field name="payslip_count" widget="statinfo"
+                                   string="Payslips"
+                                   help="Payslips Computation Details"/>
+                        </button>
+                    </div>
                     <label for="name" class="oe_edit_only"/>
                     <h1>
                         <field name="name" readonly="state != 'draft'"/>
