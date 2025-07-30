@@ -1,0 +1,21 @@
+{
+    'name': 'HR ZK API Attendance',
+    'version': '1.0.0',
+    'summary': 'Integration of ZK Attendance devices with HR Attendance',
+    'description': 'Module to integrate ZK biometric attendance devices with Odoo HR Attendance.',
+    'author': '46-d-006',
+    'website': 'https://edara.digital',
+    'category': 'Human Resources',
+    'depends': ['hr_attendance'],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/ir_cron.xml',
+        'views/menu.xml',
+        'views/zk_api.xml',
+        'views/zk_department.xml',
+        'views/zk_attendance.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'license': 'LGPL-3',
+}
