@@ -5,10 +5,16 @@
         <field name="arch" type="xml">
             <form string="ZK API">
                 <header>
-                    <button name="action_sync_departments" string="Sync Departments"
-                            type="object" class="oe_highlight"/>
-                    <button name="action_sync_attendance" string="Sync Attendance"
-                        type="object" class="oe_highlight"/>
+                    <button name="action_generate_token" string="Generate Token"
+                        type="object" class="oe_highlight" invisible="token"/>
+                    <button name="action_first_setup" string="First Setup"
+                        type="object" class="oe_highlight" invisible="is_set_up"/>
+                    <button name="action_sync_departments" invisible="not token" string="Sync Departments"
+                            type="object"/>
+                    <button name="action_sync_employees" invisible="not token" string="Sync Employees"
+                        type="object"/>
+                    <button name="hr_zk_api_attendance.action_zk_attendance_period" invisible="not token or not is_set_up" string="Sync Attendance"
+                        type="action"/>
                 </header>
                 <sheet>
                     <group>
@@ -16,7 +22,8 @@
                         <field name="url"/>
                         <field name="username"/>
                         <field name="password"/>
-                        <field name="token"/>
+                        <field name="token" invisible="1"/>
+                        <field name="is_set_up" invisible="1"/>
                     </group>
                 </sheet>
             </form>

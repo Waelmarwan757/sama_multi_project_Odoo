@@ -43,9 +43,9 @@ class ZkAttendance(models.Model):
             record.department_id = mapped_departments.get(record.dept_code, False)
 
     @api.model
-    def _get_attendance_report(self, headers, api_url):
-        start_date = date.today().replace(day=1).strftime('%Y-%m-%d')
-        end_date = date.today().strftime('%Y-%m-%d')
+    def _get_attendance_report(self, headers, api_url, start_date=None, end_date=None):
+        start_date = start_date or date.today().strftime('%Y-%m-%d')
+        end_date = end_date or date.today().strftime('%Y-%m-%d')
         departments = ','.join(str(dep.zk_id) for dep in self.env['zk.department'].search([]))
         endpoint = f"/att/api/transactionReport/?page=1&page_size=200&start_date={start_date}&end_date={end_date}&departments={quote(departments)}&areas=-1&groups=-1&employees=-1"
         url = f"{api_url}{endpoint}"
@@ -62,11 +62,13 @@ class ZkAttendance(models.Model):
             next_page = json_response.get("next")
         return data
 
+
+
     @api.model
-    def sync_attendance(self, headers, api_url):
+    def sync_attendance(self, headers, api_url, start_date=None, end_date=None):
         """Function to sync attendance from ZK API"""
         try:
-            attendance_data = self._get_attendance_report(headers, api_url)
+            attendance_data = self._get_attendance_report(headers, api_url, start_date, end_date)
         except requests.RequestException as e:
             _logger.error(f"Error fetching attendance data: {e}")
             raise UserError(_("Failed to fetch attendance data from ZK API."))
@@ -115,8 +117,11 @@ class ZkAttendance(models.Model):
             localized_datetime = cairo_tz.localize(naive_datetime)
             gmt_datetime = localized_datetime.astimezone(gmt_tz)
             gmt_naive = gmt_datetime.replace(tzinfo=None)
+            state = punch_state.lower()
+            if 'in' in state and data[employee_id][date_obj].get('check_in'):
+                gmt_naive = data[employee_id][date_obj]['check_in']  # Use existing check-in if available
             data[employee_id][date_obj][
-                'check_in' if 'in' in punch_state.lower() else 'check_out'
+                'check_in' if ('in' in state) else 'check_out'
             ] = gmt_naive
             data[employee_id][date_obj]['ids'].append((4, group['id'][0]))
 
