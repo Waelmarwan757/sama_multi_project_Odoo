@@ -7,6 +7,7 @@
                 <group>
                     <group>
                         <field name="date_period"/>
+                        <field name="create_hr_attendance"/>
                     </group>
                     <group>
                         <field name="start_date" nolabel="1" force_save="1" readonly="date_period != 'custom'" widget="daterange" options="{'end_date_field': 'end_date'}"/>

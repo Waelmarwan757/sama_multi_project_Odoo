@@ -1,0 +1,33 @@
+<odoo>
+    <data noupdate="0">
+        <record model="ir.module.category" id="module_category_samalink_hr">
+            <field name="name">SamaLink HR</field>
+        </record>
+        <record id="group_samalink_employee" model="res.groups">
+            <field name="name">SamaLink Employee</field>
+            <field name="category_id" ref="module_category_samalink_hr" />
+            <field name="implied_ids" eval="[
+                (4, ref('hr_attendance.group_hr_attendance_own_reader')),
+                (4, ref('hr_holidays.group_hr_holidays_responsible')),
+            ]" />
+        </record>
+        <record id="group_samalink_hr_manager" model="res.groups">
+            <field name="name">SamaLink HR Manager</field>
+            <field name="category_id" ref="module_category_samalink_hr" />
+            <field name="implied_ids" eval="[
+                (4, ref('group_samalink_employee')),
+                (4, ref('hr_holidays.group_hr_holidays_user)),
+            ]" />
+        </record>
+        <record id="group_samalink_hr_officer" model="res.groups">
+            <field name="name">SamaLink HR Officer</field>
+            <field name="category_id" ref="module_category_samalink_hr" />
+            <field name="implied_ids" eval="[(4, ref('hr.group_hr_user'))]" />
+        </record>
+        <record id="group_samalink_hr_accountant" model="res.groups">
+            <field name="name">SamaLink HR Accountant</field>
+            <field name="category_id" ref="module_category_samalink_hr" />
+            <field name="implied_ids" eval="[(4, ref('hr.group_hr_user'))]" />
+        </record>
+    </data>
+</odoo>

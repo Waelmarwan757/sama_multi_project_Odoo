@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 PERIOD_MAP = {
@@ -23,6 +23,10 @@ class ZKAttendancePeriodWizard(models.TransientModel):
 
     start_date = fields.Date(string='Start Date', required=True)
     end_date = fields.Date(string='End Date', required=True)
+    create_hr_attendance = fields.Boolean(
+        string='Create HR Attendance',
+        default=False
+    )
 
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
@@ -58,7 +62,26 @@ class ZKAttendancePeriodWizard(models.TransientModel):
     def do_action(self):
         zk_api_id = self.env.context.get('active_id')
         zk_api = self.env['zk.api'].browse(zk_api_id)
-        return zk_api.action_sync_attendance(
+        zk_api.action_sync_attendance(
             start_date=self.start_date,
-            end_date=self.end_date
+            end_date=self.end_date,
+            cron=True
         )
+        if self.create_hr_attendance:
+            attendance_ids = self.env['zk.attendance'].search([
+                ('date', '>=', self.start_date),
+                ('date', '<=', self.end_date)
+            ])
+            attendance_ids.action_link_hr_attendance()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Success'),
+                'message': _('Attendance synchronized successfully.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
