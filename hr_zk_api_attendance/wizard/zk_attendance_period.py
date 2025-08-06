@@ -69,8 +69,8 @@ class ZKAttendancePeriodWizard(models.TransientModel):
         )
         if self.create_hr_attendance:
             attendance_ids = self.env['zk.attendance'].search([
-                ('date', '>=', self.start_date),
-                ('date', '<=', self.end_date)
+                ('att_date', '>=', self.start_date),
+                ('att_date', '<=', self.end_date)
             ])
             attendance_ids.action_link_hr_attendance()
 
