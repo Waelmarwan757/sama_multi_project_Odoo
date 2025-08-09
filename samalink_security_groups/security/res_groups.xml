@@ -11,11 +11,9 @@
             ]" />
             <field name="whitelisted_menu_ids" eval="[
                 (4, ref('mail.menu_root_discuss')),
-                (4, ref('samalink_security_groups.menu_my_attendances')),
                 (4, ref('hr_holidays.menu_open_department_leave_approve')),
             ]" />
         </record>
-                <!-- (4, ref('hr_holidays.group_hr_holidays_responsible')), -->
         <!-- <record id="group_samalink_hr_manager" model="res.groups"> -->
             <!-- <field name="name">SamaLink HR Manager</field> -->
             <!-- <field name="category_id" ref="module_category_samalink_hr" /> -->
