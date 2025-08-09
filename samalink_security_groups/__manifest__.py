@@ -8,8 +8,8 @@
     'category': 'Tools',
     'depends': ['base', 'hr', 'hr_attendance', 'hr_holidays', 'menuitems_whitelist'],
     'data': [
+        'views/hr_attendance.xml',
         'security/res_groups.xml',
-        'views/hr_attendance.xml'
     ],
     'installable': True,
     'application': False,
