@@ -6,8 +6,11 @@
     'author': '46-d-006',
     'website': 'https://edara.digital',
     'category': 'Tools',
-    'depends': ['base', 'hr', 'hr_attendance', 'hr_holidays'],
-    'data': [],
+    'depends': ['base', 'hr', 'hr_attendance', 'hr_holidays', 'menuitems_whitelist'],
+    'data': [
+        'security/res_groups.xml',
+        'views/hr_attendance.xml'
+    ],
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
