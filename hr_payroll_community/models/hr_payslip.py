@@ -113,6 +113,13 @@ class HrPayslip(models.Model):
     payslip_count = fields.Integer(compute='_compute_payslip_count',
                                    string="Payslip Computation Details",
                                    help="Set Payslip Count")
+    # is_officer = fields.Boolean(compute="_compute_is_officer")
+
+    # @api.depends_context('uid')
+    # def _compute_is_officer(self):
+        # """Compute function for checking if user is officer"""
+        # for payslip in self:
+            # payslip.is_officer = self.env.user.has_group('hr_payroll_community.group_hr_payroll_community_user')
 
     def _compute_details_by_salary_rule_category_ids(self):
         """Compute function for Salary Rule Category for getting

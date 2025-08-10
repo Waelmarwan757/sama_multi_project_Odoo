@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_payslip_samalink_employee,hr.payslip for samalink employee,hr_payroll_community.model_hr_payslip,group_samalink_employee,1,1,0,0
+access_hr_payslip_line_samalink_employee,access.hr.payslip.line samalink employee,hr_payroll_community.model_hr_payslip_line,group_samalink_employee,1,0,0,0
+access_hr_payslip_input_samalink_employee,access.hr.payslip.input samalink employee,hr_payroll_community.model_hr_payslip_input,group_samalink_employee,1,0,0,0
+access_hr_payslip_worked_days_samalink_employee,access.hr.payslip worked.dayssamalink employee,hr_payroll_community.model_hr_payslip_worked_days,group_samalink_employee,1,0,0,0

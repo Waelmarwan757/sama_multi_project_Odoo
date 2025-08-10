@@ -27,6 +27,5 @@
     <menuitem id="menu_my_attendances"
               name="My Attendances"
               action="hr_my_attendance_action"
-              groups="samalink_security_groups.group_samalink_employee"
     />
 </odoo>
