@@ -1,4 +1,5 @@
 from odoo import models, api
+from odoo.exceptions import UserError
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'

@@ -11,6 +11,7 @@
         'views/hr_attendance.xml',
         'views/hr_payslip.xml',
         'views/hr_employee.xml',
+        'views/hr_leave.xml',
         'security/res_groups.xml',
         'security/ir_rule.xml',
         'security/ir.model.access.csv',
