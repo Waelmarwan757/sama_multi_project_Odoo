@@ -76,7 +76,7 @@ class HrPayslipRun(models.Model):
 
     def action_view_payslips(self):
         """Function to view payslips in batch"""
-        action = self.env.ref('hr_payroll_community.action_hr_payslip_line').read()[0]
+        action = self.env.ref('hr_payroll_community.action_hr_payslip_line').sudo().read()[0]
         action['domain'] = [('slip_id.payslip_run_id', '=', self.id)]
         action['context'] = {'create': False}
         action['view_mode'] = 'pivot,form'
