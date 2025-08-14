@@ -61,7 +61,8 @@
             <field name="name">SamaLink HR Accountant</field>
             <field name="category_id" ref="module_category_samalink_hr" />
             <field name="implied_ids" eval="[
-                (4, ref('group_samalink_employee'))
+                (4, ref('group_samalink_employee')),
+                (4, ref('hr_payroll_community.group_hr_payroll_community_manager')),
             ]" />
             <field name="whitelisted_menu_ids" eval="[
                 (4, ref('hr_payroll_community.menu_hr_payslip_run')),
