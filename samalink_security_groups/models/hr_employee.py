@@ -16,4 +16,5 @@ class HrEmployee(models.Model):
             'view_mode': 'form',
             'res_id': employee.id,
             'target': 'current',
+            'view_id': self.env.ref('samalink_security_groups.hr_employee_my_info_form_view').id,
         }
