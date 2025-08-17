@@ -16,6 +16,7 @@
         'views/zk_department.xml',
         'views/zk_attendance.xml',
         'views/zk_employee.xml',
+        'views/hr_attendance.xml',
     ],
     'installable': True,
     'application': False,

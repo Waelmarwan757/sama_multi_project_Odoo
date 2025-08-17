@@ -93,6 +93,7 @@ class ZkAttendance(models.Model):
             return attendance_records
 
     def action_link_hr_attendance(self):
+        _logger.info("Linking ZK attendance records to HR attendance.")
         cairo_tz = pytz.timezone("Africa/Cairo")
         gmt_tz = pytz.timezone("UTC")
         groups = self.env['zk.attendance'].read_group(
@@ -127,13 +128,16 @@ class ZkAttendance(models.Model):
 
         vals_list = []
         for employee_id, dates in data.items():
+            _logger.info(f"Processing attendance for employee ID: {employee_id}")
             for date_obj, punches in dates.items():
                 check_in = punches.get('check_in')
                 check_out = punches.get('check_out')
+                if not check_in or not check_out:
+                    continue
                 ids = punches.get('ids', [])
                 vals_list.append({
                     'employee_id': employee_id,
-                    'check_in': check_in or check_out,  # If check_in is None, use check_out
+                    'check_in': check_in,
                     'check_out': check_out,
                     'zk_attendance_ids': ids,
                 })
@@ -143,3 +147,12 @@ class ZkAttendance(models.Model):
                 self.env['hr.attendance'].create(vals)
             except Exception as e:
                 _logger.error(f"Error creating HR attendance record: {e}")
+
+    def cron_auto_link_hr_attendance(self):
+        """Cron job to automatically link HR attendance"""
+        not_linked = self.search([('hr_attendance_id', '=', False)])
+        if not_linked:
+            not_linked.action_link_hr_attendance()
+            _logger.info(f"Linked {len(not_linked)} ZK attendance records to HR attendance.")
+        else:
+            _logger.info("No ZK attendance records to link to HR attendance.")

@@ -124,6 +124,5 @@ class ZkApi(models.Model):
             try:
                 attendance_ids = api.action_sync_attendance(cron=True)
                 _logger.info(f"Attendance records synced: {len(attendance_ids)}")
-                attendance_ids.action_link_hr_attendance()
             except Exception as e:
                 _logger.error(f"Error during cron auto sync attendance: {e}")
