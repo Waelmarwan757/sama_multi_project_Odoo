@@ -8,6 +8,7 @@
     'category': 'Human Resources',
     'depends': ['hr_attendance', 'hr_work_entry', 'hr_payroll_community'],
     'data': [
+        'data/hr_salary_rule.xml',
         'views/hr_attendance.xml',
     ],
     'installable': True,
