@@ -13,7 +13,7 @@
             <!-- code -->
             <field name="amount_python_compute">hour_rate = contract.wage / (22.0 * 8.0)
 result_qty = payslip.attendance_deviation
-result = result_qty * -hour_rate</field>
+result = -hour_rate</field>
             <!-- code -->
             <field name="active">True</field>
             <field name="appears_on_payslip">True</field>
