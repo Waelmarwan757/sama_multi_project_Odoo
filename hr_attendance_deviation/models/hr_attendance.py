@@ -56,10 +56,10 @@ class HrAttendance(models.Model):
                 early_minutes = (attendance.work_entry_id.date_stop - attendance.check_out).total_seconds() / 60.0 / 60.0
                 attendance.early_check_out = max(early_minutes, 0)
 
-    def get_attendance_deviation(self):
-        """
-        Returns a dictionary with the late check-in and early check-out times.
-        """
-        return sum(self.mapped('late_check_in'))
+    def get_late_days(self):
+        allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        allowed_late_hours = int(allowed_late_minutes) / 60.0
+        late_days = len(self.filtered(lambda att: att.late_check_in > allowed_late_hours))
+        return late_days
 
     

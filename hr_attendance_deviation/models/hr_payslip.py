@@ -8,13 +8,13 @@ _logger = logging.getLogger(__name__)
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
-    attendance_deviation = fields.Float(
-        string='Attendance Deviation',
-        compute='_compute_attendance_deviation',
-        help='Total hours of attendance deviation for the payslip period.',
+    late_days = fields.Float(
+        string='Late Days',
+        compute='_compute_late_days',
+        help='Total days of late attendance for the payslip period.',
     )
 
-    def _compute_attendance_deviation(self):
+    def _compute_late_days(self):
         for payslip in self:
             from_date_midnight = datetime.combine(payslip.date_from, time.min)
             end_of_to_date = datetime.combine(payslip.date_to, time.max)
@@ -23,5 +23,5 @@ class HrPayslip(models.Model):
                 lambda att: 
                     from_date_midnight <= att.check_in <= end_of_to_date 
             )
-            attendance_deviation = attendances.get_attendance_deviation()
-            payslip.attendance_deviation = attendance_deviation
+            late_days = attendances.get_late_days()
+            payslip.late_days = late_days
