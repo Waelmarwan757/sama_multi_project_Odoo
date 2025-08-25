@@ -31,6 +31,7 @@
             ]" />
             <field name="whitelisted_menu_ids" eval="[
                 (4, ref('menu_hr_leave_waiting_1st_approve')),
+                (4, ref('hr.menu_hr_employee_user')),
             ]" />
             <field name="menu_access" eval="[
                 (4, ref('menu_hr_leave_waiting_1st_approve')),

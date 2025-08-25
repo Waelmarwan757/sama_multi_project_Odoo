@@ -16,4 +16,13 @@
             [(1, '=', 1)]
         </field>
     </record>
+
+    <record id="hr_employee_rule_group_samalink_hr_manager" model="ir.rule">
+        <field name="name">HR Employee Samalink HR Manager (Team Employees)</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="groups" eval="[(4, ref('samalink_security_groups.group_samalink_hr_manager'))]"/>
+        <field name="domain_force">
+            ['|', ('parent_id', '=', user.employee_id.id), ('user_id', '=', user.id)]
+        </field>
+    </record>
 </odoo>
