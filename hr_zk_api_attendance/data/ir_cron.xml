@@ -7,6 +7,7 @@
             <field name="code">model.cron_auto_sync_attendance()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now().replace(hour=1, minute=0, second=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
             <field name="active">True</field>
         </record>
 
@@ -17,6 +18,7 @@
             <field name="code">model.cron_auto_link_hr_attendance()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now().replace(hour=2, minute=0, second=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
             <field name="active">True</field>
         </record>
     </data>

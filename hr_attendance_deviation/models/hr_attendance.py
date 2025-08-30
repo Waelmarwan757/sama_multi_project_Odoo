@@ -1,6 +1,7 @@
 import logging
-from datetime import datetime, time
-from odoo import models, fields, api
+import pytz
+from datetime import datetime, time, timedelta
+from odoo import models, fields, api, exceptions
 
 
 _logger = logging.getLogger(__name__)
@@ -26,6 +27,11 @@ class HrAttendance(models.Model):
         compute='_compute_early_check_out',
         store=True,
         help='Time in hours that the employee checked out early.',
+    )
+    invalid_corrected = fields.Boolean(
+        string='Corrected',
+        default=False,
+        help='Indicates whether the invalid attendance record has been corrected.',
     )
 
     @api.depends('check_in', 'check_out')
@@ -62,4 +68,117 @@ class HrAttendance(models.Model):
         late_days = len(self.filtered(lambda att: att.late_check_in > allowed_late_hours))
         return late_days
 
-    
+    # @api.constrains('check_in', 'check_out', 'in_out_validity')
+    # def _check_validity_check_in_check_out(self):
+        # for attendance in self:
+            # if attendance.check_in and attendance.check_out and in_out_validity != 'invalid':
+                # if attendance.check_out < attendance.check_in:
+                    # raise exceptions.ValidationError(_('"Check Out" time cannot be earlier than "Check In" time.'))
+
+    # def _correct_invalid_attendance(self):
+        # allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        # for attendance in self:
+            # check_in = attendance.check_in
+            # check_out = attendance.check_out
+            # invalid_corrected = True
+            # if attendance.in_out_validity == 'in': # Check-in is valid
+                # check_out = attendance.work_entry_id.date_stop
+            # elif attendance.in_out_validity == 'out': # Check-out is valid
+                # check_in = attendance.work_entry_id.date_start + timedelta(minutes=allowed_late_minutes + 1)
+            # if check_in > check_out: # Check-in is before Check-out
+                # check_in = attendance.work_entry_id.date_start + timedelta(minutes=allowed_late_minutes + 1)
+                # check_out = attendance.work_entry_id.date_stop
+                # invalid_corrected = False
+            # attendance.update({
+                # 'check_in': check_in,
+                # 'check_out': check_out,
+                # 'invalid_corrected': invalid_corrected
+            # })
+        # return True
+
+    def _set_check_in_out(self): # Set Check-in or Check-out to nearest Shift time
+        self.ensure_one()
+        allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        # Differentiate between Check-in and Check-out
+        punch_datetime = self.check_in
+        # Is punch time near Shift start or end?
+        start_proximity = abs(punch_datetime - self.work_entry_id.date_start)
+        end_proximity = abs(punch_datetime - self.work_entry_id.date_stop)
+
+        if start_proximity < end_proximity:
+            # Punch time is closer to Shift start
+            self.check_out = self.work_entry_id.date_stop
+        else:
+            # Punch time is closer to Shift end
+            self.check_in = self.work_entry_id.date_start + timedelta(minutes=allowed_late_minutes + 1)
+        self.invalid_corrected = True
+        
+
+    def _is_outside_main_shift(self):
+        self.ensure_one()
+        if self.work_entry_id:
+            return self._is_outside_shift(self.work_entry_id.date_start, self.work_entry_id.date_stop)
+        return False
+
+    def _is_outside_shift(self, date_start, date_stop):
+        """
+            Check if both Check-in and Check-out miss the main shift start and end
+        """
+        self.ensure_one()
+        allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        if self.work_entry_id:
+            start_missed = abs(self.check_in - date_start) > timedelta(minutes=allowed_late_minutes + 30)
+            end_missed = abs(self.check_out - date_stop) > timedelta(minutes=allowed_late_minutes + 30)
+            return start_missed and end_missed
+        return False
+
+    def _update_work_entry_dates(self):
+        weekday_shifts = self.employee_id.contract_id.resource_calendar_ids.mapped('attendance_ids').filtered(lambda att: att.dayofweek == str(self.check_in.weekday()))
+        date = self.check_in.date()
+        for shift in weekday_shifts:
+            shift_hour_from_time = self._float_to_time(shift.hour_from)
+            shift_hour_to_time = self._float_to_time(shift.hour_to)
+            shift_start_datetime = self._convert_to_gmt(date, shift_hour_from_time)
+            shift_end_datetime = self._convert_to_gmt(date, shift_hour_to_time)
+
+            outside_shift= self._is_outside_shift(shift_start_datetime, shift_end_datetime)
+            if outside_shift:
+                continue
+            else:
+                self.work_entry_id.write({
+                    'date_start': shift_start_datetime,
+                    'date_stop': shift_end_datetime
+                })
+                break
+
+    def action_correct_invalid_attendance(self):
+        self.ensure_one()
+        if self.employee_id.contract_id.multi_shifts:
+            outside_main_shift = self._is_outside_main_shift()
+            if outside_main_shift:
+                self._update_work_entry_dates()
+        self._set_check_in_out()   
+
+    def action_bulk_correct_invalid_attendance(self):
+        for record in self:
+            record.action_correct_invalid_attendance()
+
+    def _float_to_time(self, float_time):
+        hours = int(float_time // 1)
+        minutes = int(float_time % 1) * 60
+        time_str = f"{hours:02}:{minutes:02}:00"
+        return datetime.strptime(time_str, "%H:%M:%S").time()
+
+    def _convert_to_gmt(self, date_obj, time_obj):
+        cairo_tz = pytz.timezone("Africa/Cairo")
+        gmt_tz = pytz.timezone("UTC")
+        naive_datetime = datetime.combine(date_obj, time_obj)
+        localized_datetime = cairo_tz.localize(naive_datetime)
+        gmt_datetime = localized_datetime.astimezone(gmt_tz)
+        return gmt_datetime.replace(tzinfo=None)
+
+
+    @api.model
+    def cron_correct_invalid_attendance(self):
+        invalid_attendances = self.search([('in_out_validity', '!=', 'valid'), ('invalid_corrected', '=', False), ('work_entry_id', '!=', False)])
+        invalid_attendances.action_bulk_correct_invalid_attendance()

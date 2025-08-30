@@ -36,26 +36,22 @@ class ZKAttendancePeriodWizard(models.TransientModel):
 
     @api.onchange('date_period')
     def _onchange_date_period(self):
+        today = date.today()
         if self.date_period in PERIOD_MAP:
             days_offset = PERIOD_MAP[self.date_period]
-            today = date.today()
             self.start_date = today + timedelta(days=days_offset)
             self.end_date = today + timedelta(days=days_offset)
         elif self.date_period == 'last_week':
-            today = date.today()
             self.start_date = today + timedelta(days=-13)
             self.end_date = today + timedelta(days=-7)
         elif self.date_period == 'this_week':
-            today = date.today()
             self.start_date = today + timedelta(days=-6)
             self.end_date = today
         elif self.date_period == 'last_month':
-            today = date.today()
             last_day_of_last_month = today.replace(day=1) - timedelta(days=1)
             self.start_date = last_day_of_last_month.replace(day=1)
             self.end_date = last_day_of_last_month
         elif self.date_period == 'this_month':
-            today = date.today()
             self.start_date = today.replace(day=1)
             self.end_date = today
 

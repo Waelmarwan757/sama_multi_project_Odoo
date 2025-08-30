@@ -7,7 +7,14 @@
             <field name="arch" type="xml">
                 <sheet position="inside">
                     <separator string="ZK Attendance" name="zk_separator" invisible="not zk_attendance_ids" groups="hr_attendance.group_hr_attendance_officer"/>
-                    <field name="zk_attendance_ids" groups="hr_attendance.group_hr_attendance_officer"/>
+                    <field name="zk_attendance_ids" groups="hr_attendance.group_hr_attendance_officer" invisible="not zk_attendance_ids">
+                        <list>
+                            <field name="zk_id"/>
+                            <field name="att_date"/>
+                            <field name="punch_time"/>
+                            <field name="punch_state"/>
+                        </list>
+                    </field>
                 </sheet>
             </field>
         </record>

@@ -7,8 +7,6 @@
                 <field name="zk_id"/>
                 <field name="emp_code"/>
                 <field name="employee_id"/>
-                <field name="first_name"/>
-                <field name="last_name"/>
                 <field name="department_id"/>
                 <field name="att_date"/>
                 <field name="punch_time" widget="time"/>
@@ -27,8 +25,6 @@
                         <field name="zk_id"/>
                         <field name="emp_code"/>
                         <field name="employee_id"/>
-                        <field name="first_name"/>
-                        <field name="last_name"/>
                         <field name="department_id"/>
                         <field name="att_date"/>
                         <field name="punch_time" widget="time"/>
@@ -47,7 +43,6 @@
                 <field name="zk_id"/>
                 <field name="emp_code"/>
                 <field name="employee_id"/>
-                <field name="first_name"/>
                 <field name="department_id"/>
                 <filter name="search_by_hr_attendance_id" string="Not Valid" domain="[('hr_attendance_id', '=', False)]"/>
                 <filter string="Employee" name="groupby_employee" context="{'group_by': 'employee_id'}"/>

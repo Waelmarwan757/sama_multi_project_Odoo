@@ -11,3 +11,7 @@ class HrAttendance(models.Model):
         help='ZK Attendance records associated with this HR Attendance',
         readonly=True,
     )
+    in_out_validity = fields.Selection(selection=[
+        ('invalid', 'Invalid'),
+        ('valid', 'Valid'),
+    ], default='valid', string='Check-in/Check-out Validity', help='Validity of the check-in and check-out times.', readonly=True)
