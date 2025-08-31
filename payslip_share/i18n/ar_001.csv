@@ -1,0 +1,20 @@
+module,type,name,res_id,src,value,comments
+payslip_share,model,"ir.actions.report,name",payslip_share.hr_payslip_report_action_simple,Payslip Details (Simple),,
+payslip_share,model,"ir.actions.report,print_report_name",payslip_share.hr_payslip_report_action_simple,"('%s Payslip %s - %s' % (object.employee_id.name, object.date_from, object.date_to))",,
+payslip_share,model,"ir.model,name",payslip_share.model_hr_payslip,Pay Slip,قسيمة المرتب,
+payslip_share,model,"ir.model.fields,field_description",payslip_share.field_hr_payslip__token,Token,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,Pay Slip,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Name</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Designation</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Email</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Identification No</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Reference</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Bank Account</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Date From</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,<strong>Date To</strong>,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,Rule Name,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,Total,,
+payslip_share,model_terms,"ir.ui.view,arch_db",payslip_share.report_payslipdetails_simple,Summary,,
+payslip_share,code,addons/payslip_share/models/hr_payslip.py,12,Earnings,,odoo-python
+payslip_share,code,addons/payslip_share/models/hr_payslip.py,13,Deductions,,odoo-python
+payslip_share,code,addons/payslip_share/models/hr_payslip.py,14,Net,,odoo-python
