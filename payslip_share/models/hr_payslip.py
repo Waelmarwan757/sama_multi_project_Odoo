@@ -6,7 +6,7 @@ class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
     token = fields.Char(default=lambda self: str(uuid.uuid4()))
-    access_url = fields.Char(string='Access URL', compute='_compute_access_url')
+    access_url = fields.Char(string='Access URL', compute='_compute_access_url', store=True)
 
     def get_report_summary(self):
         return {
@@ -19,6 +19,7 @@ class HrPayslip(models.Model):
         for payslip in self:
             payslip.token = str(uuid.uuid4())
 
+    @api.depends('token')
     def _compute_access_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for payslip in self:
