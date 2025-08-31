@@ -1,5 +1,5 @@
 import uuid
-from odoo import models, fields, _
+from odoo import models, fields, api, _
 
 
 class HrPayslip(models.Model):
