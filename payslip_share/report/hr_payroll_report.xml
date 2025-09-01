@@ -96,23 +96,6 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <h3>Summary</h3>
-                        <table class="table table-sm mb32">
-                            <tbody>
-                                <tr t-foreach="o.get_report_summary().items()"
-                                    t-as="line">
-                                    <td>
-                                    <!-- Key -->
-                                        <span t-esc="line[0]"/>
-                                    </td>
-                                    <td class="text-right">
-                                    <!-- Value -->
-                                        <span t-esc="line[1]"
-                                              t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </t>
             </t>
