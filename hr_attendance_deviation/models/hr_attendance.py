@@ -118,7 +118,8 @@ class HrAttendance(models.Model):
         self.ensure_one()
         if self.work_entry_id:
             return self._is_outside_shift(self.work_entry_id.date_start, self.work_entry_id.date_stop)
-        return False
+        else:
+            return True
 
     def _is_outside_shift(self, date_start, date_stop):
         """
@@ -130,26 +131,17 @@ class HrAttendance(models.Model):
             start_missed = abs(self.check_in - date_start) > timedelta(minutes=allowed_late_minutes + 30)
             end_missed = abs(self.check_out - date_stop) > timedelta(minutes=allowed_late_minutes + 30)
             return start_missed and end_missed
-        return False
+        else:
+            return False
 
     def _update_work_entry_dates(self):
-        weekday_shifts = self.employee_id.contract_id.resource_calendar_ids.mapped('attendance_ids').filtered(lambda att: att.dayofweek == str(self.check_in.weekday()))
-        date = self.check_in.date()
-        for shift in weekday_shifts:
-            shift_hour_from_time = self._float_to_time(shift.hour_from)
-            shift_hour_to_time = self._float_to_time(shift.hour_to)
-            shift_start_datetime = self._convert_to_gmt(date, shift_hour_from_time)
-            shift_end_datetime = self._convert_to_gmt(date, shift_hour_to_time)
-
-            outside_shift= self._is_outside_shift(shift_start_datetime, shift_end_datetime)
-            if outside_shift:
-                continue
-            else:
-                self.work_entry_id.write({
-                    'date_start': shift_start_datetime,
-                    'date_stop': shift_end_datetime
-                })
-                break
+        closest_shift = self._get_closest_shift()
+        if self.work_entry_id :
+            shift_start_datetime, shift_end_datetime = closest_shift
+            self.work_entry_id.write({
+                'date_start': shift_start_datetime,
+                'date_stop': shift_end_datetime
+            })
 
     def action_correct_invalid_attendance(self):
         self.ensure_one()
@@ -157,7 +149,7 @@ class HrAttendance(models.Model):
             outside_main_shift = self._is_outside_main_shift()
             if outside_main_shift:
                 self._update_work_entry_dates()
-        self._set_check_in_out()   
+        self._set_check_in_out()
 
     def action_bulk_correct_invalid_attendance(self):
         for record in self:
@@ -177,6 +169,45 @@ class HrAttendance(models.Model):
         gmt_datetime = localized_datetime.astimezone(gmt_tz)
         return gmt_datetime.replace(tzinfo=None)
 
+    def _get_weekday_attendances(self):
+        """
+        Get the weekday attendances that should employee attend.
+        if chick-in is on Monday, it should return
+        the attendances for this day.
+        return: recordset of resource.calendar.attendance
+        example:
+            monday 9:00 17:00
+            monday 11:00 19:00
+            monday 12:00 20:00
+        """
+        resource_calendar_ids = []
+        if self.employee_id.contract_id.multi_shifts:
+            resource_calendar_ids.extend(self.employee_id.contract_id.resource_calendar_ids.ids)
+        working_schedule_ids = self.employee_id.contract_id.resource_calendar_id.ids
+        weekday_attendances = self.env['resource.calendar.attendance'].search([
+            ('dayofweek', '=', str(self.check_in.weekday())),
+            ('calendar_id', 'in', resource_calendar_ids)
+        ])
+        return weekday_attendances
+
+    def _get_closest_shift(self):
+        weekday_attendances = self._get_weekday_attendances()
+        date = self.check_in.date()
+        closest_shift = None
+        for shift in weekday_attendances:
+            shift_hour_from_time = self._float_to_time(shift.hour_from)
+            shift_hour_to_time = self._float_to_time(shift.hour_to)
+            shift_start_datetime = self._convert_to_gmt(date, shift_hour_from_time)
+            shift_end_datetime = self._convert_to_gmt(date, shift_hour_to_time)
+            if not closest_shift:
+                closest_shift = (shift_start_datetime, shift_end_datetime)
+            else:
+                current_closest_start, current_closest_end = closest_shift
+                current_proximity = abs(self.check_in - current_closest_start) + abs(self.check_out - current_closest_end)
+                new_proximity = abs(self.check_in - shift_start_datetime) + abs(self.check_out - shift_end_datetime)
+                if new_proximity < current_proximity:
+                    closest_shift = (shift_start_datetime, shift_end_datetime)
+        return closest_shift
 
     @api.model
     def cron_correct_invalid_attendance(self):

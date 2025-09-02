@@ -205,7 +205,7 @@ class HrSalaryRule(models.Model):
                               nocopy=True)
                     return (float(localdict['result']),
                             'result_qty' in localdict and
-                            localdict['result_qty'] or 1.0, 'result_rate'
+                            localdict['result_qty'], 'result_rate'
                             in localdict and localdict['result_rate'] or 100.0)
                 except:
                     raise UserError(

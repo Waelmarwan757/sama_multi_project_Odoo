@@ -7,7 +7,7 @@
             <field name="arch" type="xml">
                 <div id="resource_calendar_warning" position="after">
                     <field name="multi_shifts"/>
-                    <field name="resource_calendar_ids" invisible="not multi_shifts" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="resource_calendar_ids" required="multi_shifts" invisible="not multi_shifts" widget="many2many_tags" options="{'no_create': True}"/>
                 </div>
             </field>
         </record>
