@@ -33,7 +33,7 @@ class HrPayslip(models.Model):
                 ('employee_id', '=', payslip.employee_id.id),
                 ('date_start', '>=', from_date_midnight),
                 ('date_stop', '<=', end_of_to_date),
-                ('work_entry_type_id.code', '=', 'REST_ALLOW')
+                ('work_entry_type_id.code', '=', 'REST100')
             ])
             payslip.weekend_days = weekend_days
 
