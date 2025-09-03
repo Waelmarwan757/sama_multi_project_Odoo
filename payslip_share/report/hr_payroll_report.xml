@@ -80,6 +80,8 @@
                             <thead>
                                 <tr>
                                     <th>Rule Name</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
                                     <th>Total</th>
                                 </tr>
                             </thead>
@@ -88,6 +90,13 @@
                                     t-as="line">
                                     <td>
                                         <span t-field="line.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.amount"
+                                              t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
                                     </td>
                                     <td class="text-right">
                                         <span t-field="line.total"
