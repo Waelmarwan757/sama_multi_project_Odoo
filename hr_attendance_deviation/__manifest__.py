@@ -12,6 +12,7 @@
         'data/ir_cron.xml',
         'views/hr_attendance.xml',
         'views/hr_contract.xml',
+        'views/hr_payslip.xml',
     ],
     'installable': True,
     'application': False,
