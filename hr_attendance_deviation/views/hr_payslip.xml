@@ -1,0 +1,28 @@
+<odoo>
+    <data>
+        <record id="hr_payslip_view_form" model="ir.ui.view">
+            <field name="name">hr.payslip.form</field>
+            <field name="model">hr.payslip</field>
+            <field name="inherit_id" ref="hr_payroll_community.hr_payslip_view_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <group>
+                        <group>
+                            <separator string="Late"/>
+                                <field name="late_days"/>
+                                <field name="late_hours"/>
+                                <field name="late_permission_count"/>
+                        </group>
+                        <group>
+                            <separator string="Overtime"/>
+                                <field name="overtime_hours"/>
+                            <separator string="Attendance &amp; Weekends"/>
+                                <field name="days_attended"/>
+                                <field name="weekend_days"/>
+                        </group>
+                    </group>
+                </notebook>
+            </field>
+        </record>
+    </data>
+</odoo>
