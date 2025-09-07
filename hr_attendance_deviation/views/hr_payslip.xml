@@ -6,21 +6,23 @@
             <field name="inherit_id" ref="hr_payroll_community.hr_payslip_view_form"/>
             <field name="arch" type="xml">
                 <notebook position="inside">
-                    <group>
+                    <page name="attendance_deviation" string="Attendance Deviation">
                         <group>
-                            <separator string="Late"/>
-                                <field name="late_days"/>
-                                <field name="late_hours"/>
-                                <field name="late_permission_count"/>
+                            <group>
+                                <separator string="Late"/>
+                                    <field name="late_days"/>
+                                    <field name="late_hours"/>
+                                    <field name="late_permission_count"/>
+                            </group>
+                            <group>
+                                <separator string="Overtime"/>
+                                    <field name="overtime_hours"/>
+                                <separator string="Attendance &amp; Weekends"/>
+                                    <field name="days_attended"/>
+                                    <field name="weekend_days"/>
+                            </group>
                         </group>
-                        <group>
-                            <separator string="Overtime"/>
-                                <field name="overtime_hours"/>
-                            <separator string="Attendance &amp; Weekends"/>
-                                <field name="days_attended"/>
-                                <field name="weekend_days"/>
-                        </group>
-                    </group>
+                    </page>
                 </notebook>
             </field>
         </record>
