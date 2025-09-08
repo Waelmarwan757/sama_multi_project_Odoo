@@ -130,7 +130,7 @@ class HrAttendance(models.Model):
         """
         self.ensure_one()
         allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
-        if self.work_entry_id:
+        if self.work_entry_id and self.check_in and self.check_out:
             start_missed = abs(self.check_in - date_start) > timedelta(minutes=allowed_late_minutes + 30)
             end_missed = abs(self.check_out - date_stop) > timedelta(minutes=allowed_late_minutes + 30)
             return start_missed and end_missed
