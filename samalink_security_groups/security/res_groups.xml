@@ -38,6 +38,7 @@
             <field name="implied_ids" eval="[
                 (4, ref('group_samalink_employee')),
                 (4, ref('hr_holidays.group_hr_holidays_user')),
+                (4, ref('hr_attendance.group_hr_attendance_officer')),
             ]" />
             <field name="whitelisted_menu_ids" eval="[
                 (4, ref('menu_hr_leave_waiting_1st_approve')),
