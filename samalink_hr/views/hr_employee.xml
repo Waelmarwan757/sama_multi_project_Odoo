@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="view_employee_form" model="ir.ui.view">
+            <field name="name">hr.employee.form.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <group name="identification_group" position="inside">
+                    <field name="allow_check_from_odoo"/>
+                </group>
+            </field>
+        </record>
+    </data>
+</odoo>

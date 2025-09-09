@@ -8,7 +8,7 @@
     'category': 'Human Resources',
     'depends': ['base', 'hr'],
     'data': [
-
+        'views/hr_employee.xml',
     ],
     'installable': True,
     'application': False,
