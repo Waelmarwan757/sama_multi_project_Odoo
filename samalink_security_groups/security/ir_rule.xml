@@ -37,6 +37,23 @@
         <field name="domain_force">
             ['|', ('parent_id', '=', user.employee_id.id), ('user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="hr_employee_rule_group_samalink_hr_manager_edit_own" model="ir.rule">
+        <field name="name">HR Employee Samalink HR Manager (Edit Own Only)</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="groups" eval="[(4, ref('samalink_security_groups.group_samalink_hr_manager'))]"/>
+        <field name="domain_force">
+            [('user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="0"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
     </record>
 
     <record id="hr_employee_rule_group_samalink_administrator" model="ir.rule">
