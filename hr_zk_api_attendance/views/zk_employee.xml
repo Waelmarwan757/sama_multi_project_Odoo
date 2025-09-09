@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="zk_id"/>
+                <field name="emp_code"/>
                 <field name="employee_id"/>
                 <field name="full_name"/>
                 <field name="department_id"/>
@@ -23,6 +24,7 @@
                 <sheet>
                     <group>
                         <field name="zk_id"/>
+                        <field name="emp_code"/>
                         <field name="employee_id"/>
                         <field name="full_name"/>
                         <field name="department_id"/>
@@ -30,6 +32,21 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <!-- Search View for zk.employee -->
+    <record id="view_zk_employee_search" model="ir.ui.view">
+        <field name="name">zk.employee.search</field>
+        <field name="model">zk.employee</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="zk_id"/>
+                <field name="emp_code"/>
+                <field name="employee_id"/>
+                <field name="full_name"/>
+                <field name="department_id"/>
+            </search>
         </field>
     </record>
 
