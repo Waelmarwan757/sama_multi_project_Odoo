@@ -75,4 +75,9 @@
               name="My Info"
               action="action_open_my_employee"
               sequence="10"/>
+
+    <menuitem id="hr_employee_menu_my_employees"
+            name="My Employees"
+            action="hr.open_view_employee_list_my"
+            sequence="10"/>
 </odoo>
