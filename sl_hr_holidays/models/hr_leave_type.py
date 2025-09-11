@@ -5,7 +5,7 @@ class HrLeaveType(models.Model):
     _inherit = 'hr.leave.type'
 
     requests_limit = fields.Integer(string="Requests Limit (Monthly)", default=3, help="Maximum number of leave requests an employee can make in a month.")
-    enable_request_offset = fields.Boolean(string="Notice Required", default=False, help="Enable request notice for leave requests.")
+    enable_request_offset = fields.Boolean(string="Notice Required", default=True, help="Enable request notice for leave requests.")
     request_offset = fields.Integer(string="Notice Before (Days)", default=0, help="Number of days to before the leave request.")
 
     @api.constrains('requests_limit', 'request_offset')
