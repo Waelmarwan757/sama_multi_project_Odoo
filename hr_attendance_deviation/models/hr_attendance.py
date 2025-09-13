@@ -83,8 +83,13 @@ class HrAttendance(models.Model):
 
     def action_bulk_correct_invalid_attendance(self):
         for record in self:
-            record._action_correct_invalid_attendance()
-        self.write({'invalid_corrected': True})
+            try:
+                record._action_correct_invalid_attendance()
+                record.invalid_corrected = True
+            except Exception as e:
+                _logger.error("Error correcting attendance for %s: %s", record.id, e)
+                record.invalid_corrected = False
+                record.message_post(body=f"Error correcting attendance: {e}")
 
     def _action_correct_invalid_attendance(self):
         self.ensure_one()
