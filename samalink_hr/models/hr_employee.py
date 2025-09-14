@@ -21,6 +21,11 @@ class HrEmployee(models.Model):
             if group['pin_count'] > 1:
                 raise UserError(f"PIN Code {group['pin']} must be unique found {group['pin_count']} instances.")
 
+    @api.constrains('parent_id')
+    def _check_parent_id(self):
+        if not self.env.user.has_group('hr.group_hr_manager'):
+            raise UserError("You cannot change the Manager field. Please contact your administrator.")
+
     def _attendance_action_change(self, geo_information=None):
         self.ensure_one()
         if not self.sudo().allow_check_from_odoo:
