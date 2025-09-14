@@ -36,4 +36,9 @@
               name="Team Attendances"
               action="hr_attendance.hr_attendance_management_action"
     />
+
+    <menuitem id="menu_all_attendances"
+              name="All Attendances"
+              action="hr_attendance.hr_attendance_action"
+    />
 </odoo>

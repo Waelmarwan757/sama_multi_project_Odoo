@@ -23,7 +23,7 @@ class HrEmployee(models.Model):
 
     @api.constrains('parent_id')
     def _check_parent_id(self):
-        if not self.env.user.has_group('hr.group_hr_manager'):
+        if not (self.env.user.has_group('hr.group_hr_manager') or self.env.user.has_group('samalink_security_groups.group_samalink_hr_officer')):
             raise UserError("You cannot change the Manager field. Please contact your administrator.")
 
     def _attendance_action_change(self, geo_information=None):
