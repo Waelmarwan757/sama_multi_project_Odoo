@@ -30,4 +30,6 @@ class HrEmployee(models.Model):
         self.ensure_one()
         if not self.sudo().allow_check_from_odoo:
             raise UserError("You are not allowed to check in/out from Odoo. Please contact your administrator.")
+        if not geo_information['latitude'] or not geo_information['longitude']:
+            raise UserError("Location information is required for attendance actions.")
         return super()._attendance_action_change(geo_information=geo_information)

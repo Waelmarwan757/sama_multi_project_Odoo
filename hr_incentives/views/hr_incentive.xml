@@ -60,7 +60,7 @@
     </record>
 
     <menuitem id="menu_hr_incentives_root" name="Incentives"
-              sequence="20" groups="hr_incentives.group_hr_incentives_officer"
+              sequence="20"
               parent="hr.menu_hr_root"
               action="action_hr_incentives"
               />
