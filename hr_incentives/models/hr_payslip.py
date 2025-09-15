@@ -18,7 +18,7 @@ class HrPayslip(models.Model):
         for payslip in self:
             from_date_midnight = datetime.combine(payslip.date_from, time.min)
             end_of_to_date = datetime.combine(payslip.date_to, time.max)
-            incentives = self.env['hr.incentive'].search([
+            incentives = self.env['hr.incentive'].sudo().search([
                 ('employee_id', '=', payslip.employee_id.id),
                 ('date', '>=', from_date_midnight),
                 ('date', '<=', end_of_to_date),
