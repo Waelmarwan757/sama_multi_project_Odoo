@@ -8,10 +8,10 @@
     'category': 'Human Resources',
     'depends': ['hr', 'hr_contract', 'hr_payroll_community'],
     'data': [
+        'views/hr_incentive.xml',
         'security/res_groups.xml',
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
-        'views/hr_incentive.xml',
     ],
     'installable': True,
     'application': True,
