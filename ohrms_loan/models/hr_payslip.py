@@ -41,23 +41,34 @@ class HrPayslip(models.Model):
         employee_id = self.env['hr.contract'].browse(
             contract_ids[0].id).employee_id if contract_ids \
             else self.employee_id
-        loan_id = self.env['hr.loan'].search(
-            [('employee_id', '=', employee_id.id), ('state', '=', 'approve')])
-        for loan in loan_id:
-            for loan_line in loan.loan_lines:
-                if (date_from <= loan_line.date <= date_to and
-                        not loan_line.paid):
-                    for result in res:
-                        if result.get('code') == 'LO':
-                            result['amount'] = loan_line.amount
-                            result['loan_line_id'] = loan_line.id
+        loan_lines = self.env['hr.loan.line'].search(
+            [('date', '>=', date_from), ('date', '<=', date_to), ('paid', '=', False),
+             ('loan_id.employee_id', '=', employee_id.id),
+             ('loan_id.state', '=', 'approve')]
+        )
+        total_loan_amount = sum(loan_lines.mapped('amount'))
+        for input in res:
+            if input.get('code') == 'LO':
+                input.update({'amount': total_loan_amount,
+                              'loan_line_ids': [(4, line.id) for line in loan_lines]})
+        
+        # loan_id = self.env['hr.loan'].search(
+            # [('employee_id', '=', employee_id.id), ('state', '=', 'approve')])
+        # for loan in loan_id:
+            # for loan_line in loan.loan_lines:
+                # if (date_from <= loan_line.date <= date_to and
+                        # not loan_line.paid):
+                    # for result in res:
+                        # if result.get('code') == 'LO':
+                            # result['amount'] = loan_line.amount
+                            # result['loan_line_ids'] = [(4, loan_line.id)]
         return res
 
     def action_payslip_done(self):
         """ Compute the loan amount and remaining amount while confirming
             the payslip"""
         for line in self.input_line_ids:
-            if line.loan_line_id:
-                line.loan_line_id.paid = True
-                line.loan_line_id.loan_id._compute_total_amount()
+            if line.loan_line_ids:
+                line.loan_line_ids.write({'paid': True})
+                line.loan_line_ids.loan_id._compute_total_amount()
         return super(HrPayslip, self).action_payslip_done()

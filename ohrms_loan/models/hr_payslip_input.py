@@ -28,9 +28,9 @@ class HrPayslipInput(models.Model):
     fields related to loan information and date details"""
     _inherit = 'hr.payslip.input'
 
-    loan_line_id = fields.Many2one('hr.loan.line',
-                                   string="Loan Installment",
-                                   help="Loan installment associated "
+    loan_line_ids = fields.Many2many('hr.loan.line',
+                                   string="Loan Installments",
+                                   help="Loan installments associated "
                                         "with this payslip input.")
     date_to = fields.Date(string="Date To", help="End date for the "
                                                  "payslip input.")

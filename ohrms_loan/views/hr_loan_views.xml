@@ -29,7 +29,7 @@
                     <button name="action_approve" type="object"
                             string="Approve" invisible="state != 'waiting_approval_1'"
                             class="oe_highlight"
-                            groups="hr.group_hr_manager" groups="ohrms_loan.group_loan_second_approval"/>
+                            groups="ohrms_loan.group_loan_second_approval"/>
                     <button name="action_refuse" type="object" string="Refuse"
                             invisible="state not in ['draft','waiting_approval_1']"
                             class="oe_highlight"

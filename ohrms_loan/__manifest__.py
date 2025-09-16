@@ -35,6 +35,7 @@
     'website': "https://cybrosys.com, https://www.openhrms.com",
     'depends': ['hr', 'account', 'hr_payroll_community'],
     'data': [
+        'security/res_groups.xml',
         'security/hr_loan_security.xml',
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
