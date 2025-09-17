@@ -12,6 +12,7 @@
         'security/res_groups.xml',
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
+        'views/hr_payslip.xml',
     ],
     'installable': True,
     'application': True,

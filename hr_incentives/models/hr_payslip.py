@@ -8,10 +8,15 @@ _logger = logging.getLogger(__name__)
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
-    incetives_amount = fields.Float(
-        string='Incentives Amount',
+    bonus_amount = fields.Float(
+        string='Bonus Amount',
         compute='_compute_incentives_amount',
-        help='Total incentives amount for the payslip period.',
+        help='Total bonus amount for the payslip period.',
+    )
+    penalty_amount = fields.Float(
+        string='Penalty Amount',
+        compute='_compute_incentives_amount',
+        help='Total penalty amount for the payslip period.',
     )
 
     def _compute_incentives_amount(self):
@@ -22,6 +27,7 @@ class HrPayslip(models.Model):
                 ('employee_id', '=', payslip.employee_id.id),
                 ('date', '>=', from_date_midnight),
                 ('date', '<=', end_of_to_date),
-                ('state', '=', 'approved')
+                ('state', '=', 'approved'),
             ])
-            payslip.incentives_amount = sum(incentives.mapped('amount'))
+            payslip.bonus_amount = sum(incentives.filtered(lambda i: i.type == 'bonus').mapped('amount'))
+            payslip.penalty_amount = sum(incentives.filtered(lambda i: i.type == 'penalty').mapped('amount'))

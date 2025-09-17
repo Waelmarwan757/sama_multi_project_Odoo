@@ -55,21 +55,19 @@ class HrIncentive(models.Model):
                 raise ValidationError("The employee must have a current contract with a positive wage.")
 
     def action_draft(self):
-        for record in self:
-            record.state = 'draft'
+        self.write({'state': 'draft'})
 
     def action_validate(self):
-        for record in self:
-            record.state = 'validated'
+        self.write({'state': 'validated'})
 
     def action_approve(self):
-        for record in self:
-            record.state = 'approved'
+        if not self.env.user.has_group('hr_incentives.group_hr_incentives_manager'):
+            self.action_validate()
+        else:
+            self.write({'state': 'approved'})
 
     def action_refuse(self):
-        for record in self:
-            record.state = 'rejected'
+        self.write({'state': 'rejected'})
 
     def action_cancel(self):
-        for record in self:
-            record.state = 'cancelled'
+        self.write({'state': 'cancelled'})
