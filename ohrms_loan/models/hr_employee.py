@@ -37,3 +37,15 @@ class HrEmployee(models.Model):
         for rec in self:
             rec.loan_count = rec.env['hr.loan'].search_count(
                 [('employee_id', '=', rec.id)])
+
+    def action_view_loans(self):
+        """Action to view loans associated with the employee."""
+        self.ensure_one()
+        return {
+            'name': 'Loans',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'list,form',
+            'res_model': 'hr.loan',
+            'domain': [('employee_id', '=', self.id)],
+            'context': {'default_employee_id': self.id}
+        }
