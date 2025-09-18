@@ -15,6 +15,7 @@
                 (4, ref('samalink_security_groups.menu_my_attendances')),
                 (4, ref('samalink_security_groups.menu_my_payslips')),
                 (4, ref('samalink_security_groups.hr_employee_menu_my_info')),
+                (4, ref('ohrms_loan.hr_loan_menu_requests')),
             ]" />
             <field name="menu_access" eval="[
                 (4, ref('samalink_security_groups.menu_my_attendances')),

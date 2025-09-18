@@ -23,18 +23,20 @@
                 <header>
                     <button name="action_compute_installment" type="object"
                             string="Compute Installment" class="oe_highlight"
-                            invisible="state in ('approve','refuse')"/>
-                    <button name="action_submit" type="object" string="Submit" invisible="state != 'draft'"
+                            invisible="state in ('approve','refuse') or loan_lines" groups="ohrms_loan.group_loan_officer"/>
+                    <button name="action_submit" type="object" string="Submit" invisible="state != 'draft' or not loan_lines"
                             class="oe_highlight" groups="ohrms_loan.group_loan_first_approval"/>
                     <button name="action_approve" type="object"
-                            string="Approve" invisible="state != 'waiting_approval_1'"
+                            string="Approve" invisible="state != 'waiting_approval_1' or not loan_lines"
                             class="oe_highlight"
                             groups="ohrms_loan.group_loan_second_approval"/>
+                    <button name="action_compute_installment" type="object"
+                            string="Compute Installment"
+                            invisible="state in ('approve','refuse') or not loan_lines" groups="ohrms_loan.group_loan_officer"/>
                     <button name="action_refuse" type="object" string="Refuse"
-                            invisible="state not in ['draft','waiting_approval_1']"
-                            class="oe_highlight"
-                            groups="hr.group_hr_manager"/>
-                    <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft'"/>
+                            invisible="state not in ['waiting_approval_1']"
+                            groups="ohrms_loan.group_loan_officer"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft' or not id"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,waiting_approval_1,approve"/>
                 </header>
@@ -47,10 +49,11 @@
                         </h1>
                     </div>
                     <group col="4">
-                        <field name="employee_id" readonly="state == 'approve'"/>
+                        <field name="employee_id" readonly="state == 'approve'" force_save="1" groups="ohrms_loan.group_loan_officer"/>
+                        <field name="employee_id" invisible="1" force_save="1"/>
                         <field name="date"/>
-                        <field name="department_id"/>
-                        <field name="job_position_id"/>
+                        <field name="department_id" groups="ohrms_loan.group_loan_officer"/>
+                        <field name="job_position_id" groups="ohrms_loan.group_loan_officer"/>
                         <field name="loan_amount" readonly="state == 'approve'"/>
                         <field name="installment" readonly="state == 'approve'"/>
                         <field name="payment_date" readonly="state == 'approve'"/>
@@ -58,7 +61,7 @@
                                readonly="state != 'draft'"
                                groups="base.group_multi_company"/>
                         <field name="currency_id"
-                               options="{'no_create': True}"/>
+                               options="{'no_create': True}" readonly="state == 'approve'" groups="ohrms_loan.group_loan_officer"/>
                     </group>
                     <notebook>
                         <page string="Installments">

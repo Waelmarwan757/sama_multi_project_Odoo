@@ -59,7 +59,7 @@ class HrLoan(models.Model):
                                     help="The department to which the "
                                          "employee belongs.")
     installment = fields.Integer(string="No Of Installments", default=1,
-                                 help="Number of installments")
+                                 help="Number of installments", tracking=True)
     payment_date = fields.Date(string="Payment Start Date", required=True,
                                default=fields.Date.today(),
                                help="Date of the payment")
@@ -74,13 +74,13 @@ class HrLoan(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency',
                                   required=True, help="Currency",
                                   default=lambda self: self.env.user.
-                                  company_id.currency_id)
+                                  company_id.currency_id, tracking=True)
     job_position_id = fields.Many2one('hr.job',
                                    related="employee_id.job_id",
                                    readonly=True, string="Job Position",
                                    help="Job position of the employee")
     loan_amount = fields.Float(string="Loan Amount", required=True,
-                               help="Loan amount")
+                               help="Loan amount", tracking=True)
     total_amount = fields.Float(string="Total Amount", store=True,
                                 readonly=True, compute='_compute_total_amount',
                                 help="The total amount of the loan")
@@ -97,7 +97,7 @@ class HrLoan(models.Model):
         [('draft', 'Draft'), ('waiting_approval_1', 'Submitted'),
          ('approve', 'Approved'), ('refuse', 'Refused'), ('cancel', 'Canceled'),
          ], string="State", default='draft', help="The current state of the "
-                                                  "loan request.", copy=False)
+                                                  "loan request.", copy=False, tracking=True)
 
     def _compute_total_amount(self):
         """ Compute total loan amount,balance amount and total paid amount"""

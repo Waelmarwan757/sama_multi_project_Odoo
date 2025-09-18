@@ -6,7 +6,16 @@
     'author': '46-d-006',
     'website': 'https://edara.digital',
     'category': 'Tools',
-    'depends': ['base', 'hr', 'hr_attendance', 'hr_holidays', 'hr_payroll_community', 'menuitems_whitelist', 'hr_work_entry'],
+    'depends': [
+        'base', 
+        'hr', 
+        'hr_attendance', 
+        'hr_holidays', 
+        'hr_payroll_community', 
+        'menuitems_whitelist', 
+        'hr_work_entry',
+        'ohrms_loan',
+    ],
     'data': [
         'views/hr_attendance.xml',
         'views/hr_payslip.xml',

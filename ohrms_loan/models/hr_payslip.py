@@ -50,18 +50,7 @@ class HrPayslip(models.Model):
         for input in res:
             if input.get('code') == 'LO':
                 input.update({'amount': total_loan_amount,
-                              'loan_line_ids': [(4, line.id) for line in loan_lines]})
-        
-        # loan_id = self.env['hr.loan'].search(
-            # [('employee_id', '=', employee_id.id), ('state', '=', 'approve')])
-        # for loan in loan_id:
-            # for loan_line in loan.loan_lines:
-                # if (date_from <= loan_line.date <= date_to and
-                        # not loan_line.paid):
-                    # for result in res:
-                        # if result.get('code') == 'LO':
-                            # result['amount'] = loan_line.amount
-                            # result['loan_line_ids'] = [(4, loan_line.id)]
+                              'loan_line_ids': [(4, line.id) for line in loan_lines]})        
         return res
 
     def action_payslip_done(self):
