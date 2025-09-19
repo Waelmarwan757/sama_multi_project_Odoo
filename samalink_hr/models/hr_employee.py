@@ -1,6 +1,6 @@
 import logging
-from odoo import models, fields, api
-from odoo.exceptions import UserError
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError, ValidationError
 
 
 _logger = logging.getLogger(__name__)
@@ -33,3 +33,21 @@ class HrEmployee(models.Model):
         if not geo_information['latitude'] or not geo_information['longitude']:
             raise UserError("Location information is required for attendance actions.")
         return super()._attendance_action_change(geo_information=geo_information)
+
+    def action_create_user(self):
+        self.ensure_one()
+        if self.user_id:
+            raise ValidationError(_("This employee already has an user."))
+        if not self.work_email and not self.mobile_phone:
+            raise ValidationError(_("Employee must have a work email to create a user."))
+        vals = {
+            'create_employee_id': self.id,
+            'name': self.name,
+            'phone': self.work_phone,
+            'mobile': self.mobile_phone,
+            'login': self.work_email,
+            'partner_id': self.work_contact_id.id,
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('samalink_security_groups.group_samalink_employee').id])],
+            'password': "1",
+        }
+        user = self.env['res.users'].sudo().create(vals)

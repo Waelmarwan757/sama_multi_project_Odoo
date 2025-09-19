@@ -11,6 +11,30 @@ _logger = logging.getLogger(__name__)
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
 
+    request_date_from_period = fields.Selection([
+        ('am', 'First Half'), ('pm', 'Second Half')],
+        string="Date Period Start", default='am')
+    
+    def _get_hour_from_to(self, request_date_from, request_date_to, day_period=None):
+        hour_from, hour_to = super()._get_hour_from_to(request_date_from, request_date_to, day_period=day_period)
+        if self.request_unit_half:
+            if hour_from and hour_to:
+                hour_from, hour_to = self._half_day_hour_from_to(hour_from, hour_to, day_period)
+            else:
+                original_day_period = day_period
+                day_period = 'morning' if day_period == 'afternoon' else 'afternoon'
+                hour_from, hour_to = super()._get_hour_from_to(request_date_from, request_date_to, day_period=day_period)
+                hour_from, hour_to = self._half_day_hour_from_to(hour_from, hour_to, original_day_period)
+        return (hour_from, hour_to)
+
+    def _half_day_hour_from_to(self, hour_from, hour_to, day_period):
+        half_day_hours = self.resource_calendar_id.hours_per_day / 2
+        if day_period == 'morning':
+            hour_to = hour_from + half_day_hours
+        elif day_period == 'afternoon':
+            hour_from = hour_to - half_day_hours
+        return (hour_from, hour_to)
+
     @api.constrains('employee_id', 'request_date_from', 'holiday_status_id')
     def _check_requests_limit(self):
         for record in self:
