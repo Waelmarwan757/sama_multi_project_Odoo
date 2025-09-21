@@ -81,6 +81,14 @@ class HrAttendance(models.Model):
         late_hours = sum(late_attendances.mapped('late_check_in'))
         return {'late_days': late_days, 'late_hours': late_hours}
 
+    def get_early_leaving_days_hours(self):
+        allowed_early_leaving_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_early_leaving_minutes', default=15)
+        allowed_early_leaving_hours = int(allowed_early_leaving_minutes) / 60.0
+        early_leaving_attendances = self.filtered(lambda att: att.early_check_out > allowed_early_leaving_hours)
+        early_leaving_days = len(early_leaving_attendances)
+        early_leaving_hours = sum(early_leaving_attendances.mapped('early_check_out'))
+        return {'early_leaving_days': early_leaving_days, 'early_leaving_hours': early_leaving_hours}
+
     def action_bulk_correct_invalid_attendance(self):
         for record in self:
             try:

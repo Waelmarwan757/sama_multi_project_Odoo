@@ -9,7 +9,10 @@
                     <page name="attendance_deviation" string="Attendance Deviation">
                         <group>
                             <group>
-                                <separator string="Late"/>
+                                <separator string="Early Leaving"/>
+                                    <field name="early_leaving_days"/>
+                                    <field name="early_leaving_hours"/>
+                                <separator string="Late Leaving"/>
                                     <field name="late_days"/>
                                     <field name="late_hours"/>
                                     <field name="late_permission_count"/>

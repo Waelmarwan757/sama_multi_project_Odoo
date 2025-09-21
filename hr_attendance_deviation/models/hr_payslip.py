@@ -10,18 +10,28 @@ class HrPayslip(models.Model):
 
     late_days = fields.Float(
         string='Late Days',
-        compute='_compute_late_days_hours',
+        compute='_compute_partial_shift_days_hours',
         help='Total days of late attendance for the payslip period.',
     )
     late_hours = fields.Float(
         string='Late Hours',
-        compute='_compute_late_days_hours',
+        compute='_compute_partial_shift_days_hours',
         help='Total hours of late attendance for the payslip period.',
     )
     late_permission_count = fields.Integer(
         string='Late Permissions',
         compute='_compute_late_permission_count',
         help='Number of late permissions granted during the payslip period.',
+    )
+    early_leaving_days = fields.Float(
+        string='Early Leaving Days',
+        compute='_compute_partial_shift_days_hours',
+        help='Total days of early leaving for the payslip period.',
+    )
+    early_leaving_hours = fields.Float(
+        string='Early Leaving Hours',
+        compute='_compute_partial_shift_days_hours',
+        help='Total hours of early leaving for the payslip period.',
     )
     overtime_hours = fields.Float(
         string='Overtime Hours (Approved)',
@@ -87,7 +97,7 @@ class HrPayslip(models.Model):
             ])
             payslip.days_attended = days_attended
 
-    def _compute_late_days_hours(self):
+    def _compute_partial_shift_days_hours(self):
         for payslip in self:
             from_date_midnight = datetime.combine(payslip.date_from, time.min)
             end_of_to_date = datetime.combine(payslip.date_to, time.max)
@@ -99,3 +109,6 @@ class HrPayslip(models.Model):
             late_days_hours = attendances.get_late_days_hours()
             payslip.late_days = late_days_hours['late_days']
             payslip.late_hours = late_days_hours['late_hours']
+            early_leaving_days_hours = attendances.get_early_leaving_days_hours()
+            payslip.early_leaving_days = early_leaving_days_hours['early_leaving_days']
+            payslip.early_leaving_hours = early_leaving_days_hours['early_leaving_hours']
