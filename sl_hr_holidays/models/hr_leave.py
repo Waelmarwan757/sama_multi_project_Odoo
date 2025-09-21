@@ -14,6 +14,14 @@ class HrLeave(models.Model):
     request_date_from_period = fields.Selection([
         ('am', 'First Half'), ('pm', 'Second Half')],
         string="Date Period Start", default='am')
+
+    @api.constrains('number_of_hours', 'resource_calendar_id', 'leave_type_request_unit')
+    def _check_half_day_hours_limit(self):
+        for record in self:
+            half_day_hours = record.resource_calendar_id.hours_per_day / 2
+            if record.leave_type_request_unit == 'hour' and record.number_of_hours > half_day_hours:
+                raise ValidationError(f"You can only request a half-day leave of up to {half_day_hours} hours.")
+
     
     def _get_hour_from_to(self, request_date_from, request_date_to, day_period=None):
         hour_from, hour_to = super()._get_hour_from_to(request_date_from, request_date_to, day_period=day_period)
