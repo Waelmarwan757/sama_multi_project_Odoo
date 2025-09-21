@@ -126,3 +126,12 @@ class ZkApi(models.Model):
                 _logger.info(f"Attendance records synced: {len(attendance_ids)}")
             except Exception as e:
                 _logger.error(f"Error during cron auto sync attendance: {e}")
+
+    def cron_auto_sync_employees(self):
+        """Cron job to automatically sync employees"""
+        for api in self.search([('active', '=', True), ('is_set_up', '=', True)]):
+            try:
+                api.action_sync_employees()
+                _logger.info("Employees synced successfully via cron.")
+            except Exception as e:
+                _logger.error(f"Error during cron auto sync employees: {e}")
