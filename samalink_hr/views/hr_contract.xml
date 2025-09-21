@@ -1,0 +1,15 @@
+<odoo>
+    <data>
+        <record id="hr_contract_view_form" model="ir.ui.view">
+            <field name="name">hr.contract.form</field>
+            <field name="model">hr.contract</field>
+            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+            <field name="arch" type="xml">
+                <group name="salary" position="inside">
+                    <field name="salary_payment_method"/>
+                    <field name="not_listed_payment_method" invisible="salary_payment_method != 'other'" required="salary_payment_method == 'other'"/>
+                </group>
+            </field>
+        </record>
+    </data>
+</odoo>
