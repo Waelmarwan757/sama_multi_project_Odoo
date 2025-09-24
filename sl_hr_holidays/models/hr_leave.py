@@ -19,7 +19,7 @@ class HrLeave(models.Model):
     def _check_half_day_hours_limit(self):
         for record in self:
             half_day_hours = record.resource_calendar_id.hours_per_day / 2
-            if record.leave_type_request_unit == 'hour' and record.number_of_hours > half_day_hours:
+            if (record.request_unit_half or record.request_unit_hours) and record.leave_type_request_unit == 'hour' and record.number_of_hours > half_day_hours:
                 raise ValidationError(f"You can only request a half-day leave of up to {half_day_hours} hours and you requested {record.number_of_hours} hours for {record.name}.")
 
     
