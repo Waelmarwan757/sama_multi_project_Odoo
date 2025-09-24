@@ -295,7 +295,8 @@ class HrPayslip(models.Model):
             uniq_leaves = [*set(multi_leaves)]
             c_leaves = {}
             for rec in uniq_leaves:
-                duration = rec.duration_display.replace("days", "").strip()
+                # duration = rec.duration_display.replace("days", "").strip()
+                duration = rec.number_of_days
                 duration_in_hours = float(duration) * 24
                 c_leaves.setdefault(rec.holiday_status_id,
                                     {'hours': duration_in_hours})
