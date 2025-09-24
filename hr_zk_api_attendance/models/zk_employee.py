@@ -94,7 +94,7 @@ class ZkEmployee(models.Model):
         return not_linked
 
     def cron_auto_link_hr_employee(self):
-        not_linked = self.search([('employee_id', '=', False)]).__create_hr_employees()
+        not_linked = self.search([('employee_id', '=', False)])
         if not_linked:
             not_linked._compute_employee_id()
             _logger.info(f"Linked {len(not_linked)} ZK employees to HR employees.")
