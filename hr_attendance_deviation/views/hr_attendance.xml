@@ -9,9 +9,11 @@
                     <field name="work_entry_id"/>
                 </field>
                 <field name="in_mode" position="after">
+                    <field name="expected_check_in"/>
                     <field name="late_check_in" widget="float_time"/>
                 </field>
                 <field name="out_mode" position="after">
+                    <field name="expected_check_out"/>
                     <field name="early_check_out" widget="float_time"/>
                 </field>
             </field>

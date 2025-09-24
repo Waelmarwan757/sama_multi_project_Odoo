@@ -22,14 +22,26 @@ class HrAttendance(models.Model):
         help='Indicates whether the attendance is outside the main shift hours.',
         store=True,
     )
+    expected_check_in = fields.Datetime(
+        string='Expected',
+        compute='_compute_expected_check_time',
+        store=True,
+        help='Expected check-in time based on the work entry.',
+    )
     late_check_in = fields.Float(
-        string='Late Check-in',
+        string='Late',
         compute='_compute_late_check_in',
         store=True,
         help='Time in hours that the employee checked in late.',
     )
+    expected_check_out = fields.Datetime(
+        string='Expected',
+        compute='_compute_expected_check_time',
+        store=True,
+        help='Expected check-out time based on the work entry.',
+    )
     early_check_out = fields.Float(
-        string='Early Check-out',
+        string='Early',
         compute='_compute_early_check_out',
         store=True,
         help='Time in hours that the employee checked out early.',
@@ -55,22 +67,46 @@ class HrAttendance(models.Model):
             attendance.work_entry_id = work_entries.id
 
     @api.depends('check_in', 'check_out', 'work_entry_id.date_start', 'work_entry_id.date_stop')
+    def _compute_expected_check_time(self):
+        attendance_type = self.env.ref('hr_work_entry.work_entry_type_attendance')
+        for attendance in self:
+            date_midnight = datetime.combine(attendance.check_in.date(), time.min)
+            end_of_date = datetime.combine(attendance.check_in.date(), time.max)
+            work_entries = self.env['hr.work.entry'].search([
+                ('employee_id', '=', attendance.employee_id.id),
+                ('date_start', '>=', date_midnight),
+                ('date_stop', '<=', end_of_date),
+                '|',
+                ('work_entry_type_id', '=', attendance_type.id),
+                ('work_entry_type_id.code', '=', 'LATE')
+            ])
+            work_entries_count = len(work_entries)
+            if work_entries_count == 1 and work_entries.work_entry_type_id == attendance_type: # Only one work entry and it's of type 'Attendance'
+                attendance.expected_check_in = work_entries.date_start
+                attendance.expected_check_out = work_entries.date_stop
+            elif work_entries_count > 1:
+                attendance.expected_check_in = min(work_entries.mapped('date_start'))
+                attendance.expected_check_out = max(work_entries.mapped('date_stop'))
+            else:
+                attendance.expected_check_in = False
+
+    @api.depends('expected_check_in', 'expected_check_out')
     def _compute_is_outside_main_shift(self):
         for attendance in self:
             attendance.is_outside_main_shift = attendance._is_outside_main_shift()
 
-    @api.depends('check_in', 'work_entry_id.date_start')
+    @api.depends('check_in', 'expected_check_in')
     def _compute_late_check_in(self):
         for attendance in self:
-            if attendance.check_in and attendance.work_entry_id:
-                late_minutes = (attendance.check_in - attendance.work_entry_id.date_start).total_seconds() / 60.0 / 60.0
+            if attendance.check_in and attendance.expected_check_in:
+                late_minutes = (attendance.check_in - attendance.expected_check_in).total_seconds() / 60.0 / 60.0
                 attendance.late_check_in = max(late_minutes, 0)
 
-    @api.depends('check_out', 'work_entry_id.date_stop')
+    @api.depends('check_out', 'expected_check_out')
     def _compute_early_check_out(self):
         for attendance in self:
-            if attendance.check_out and attendance.work_entry_id:
-                early_minutes = (attendance.work_entry_id.date_stop - attendance.check_out).total_seconds() / 60.0 / 60.0
+            if attendance.check_out and attendance.expected_check_out:
+                early_minutes = (attendance.expected_check_out - attendance.check_out).total_seconds() / 60.0 / 60.0
                 attendance.early_check_out = max(early_minutes, 0)
 
     def get_late_days_hours(self):
@@ -132,8 +168,8 @@ class HrAttendance(models.Model):
 
     def _is_outside_main_shift(self):
         self.ensure_one()
-        if self.work_entry_id:
-            return self._is_outside_shift(self.work_entry_id.date_start, self.work_entry_id.date_stop)
+        if self.expected_check_in and self.expected_check_out:
+            return self._is_outside_shift(self.expected_check_in, self.expected_check_out)
         else:
             return False
 
