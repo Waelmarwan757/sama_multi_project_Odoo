@@ -144,6 +144,7 @@ class HrAttendance(models.Model):
         if self.in_out_validity == 'valid' or not self.work_entry_id and self.invalid_corrected:
             return # Aborting if valid or no work entry and already corrected
         allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        allowed_early_leaving_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_early_leaving_minutes', default=15)
         # Differentiate between Check-in and Check-out
         punch_datetime = self.check_in
         # Is punch time near Shift start or end?
@@ -152,7 +153,7 @@ class HrAttendance(models.Model):
 
         if start_proximity < end_proximity:
             # Punch time is closer to Shift start
-            self.check_out = self.work_entry_id.date_stop
+            self.check_out = self.work_entry_id.date_stop - timedelta(minutes=allowed_early_leaving_minutes + 1)
         else:
             # Punch time is closer to Shift end
             self.check_in = self.work_entry_id.date_start + timedelta(minutes=allowed_late_minutes + 1)
