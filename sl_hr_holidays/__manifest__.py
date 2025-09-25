@@ -9,6 +9,7 @@
     'depends': ['base', 'hr_holidays'],
     'data': [
         'views/hr_leave_type.xml',
+        'views/hr_leave.xml',
     ],
     'installable': True,
     'application': False,

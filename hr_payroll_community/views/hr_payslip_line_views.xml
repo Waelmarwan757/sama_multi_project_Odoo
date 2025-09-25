@@ -207,12 +207,14 @@
                                     <field name="name"/>
                                     <field name="code"/>
                                     <field name="category_id"/>
-                                    <field name="sequence" invisible="1"/>
+                                    <field name="sequence" column_invisible="1"/>
                                     <field name="quantity"/>
                                     <field name="rate"/>
                                     <field name="salary_rule_id"/>
                                     <field name="amount"/>
                                     <field name="total"/>
+                                    <field name="related_records_count" column_invisible="1"/>
+                                    <button name="open_related_records" invisible="related_records_count == 0" type="object" class="oe_stat_button" icon="fa-external-link"/>
                                 </list>
                                 <form string="Payslip Line">
                                     <group col="4">

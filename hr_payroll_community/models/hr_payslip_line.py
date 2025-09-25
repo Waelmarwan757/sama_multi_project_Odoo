@@ -54,6 +54,8 @@ class HrPayslipLine(models.Model):
     total = fields.Float(compute='_compute_total', string='Total',
                          help="Total amount for Payslip",
                          digits=dp.get_precision('Payroll'), store=True)
+    related_records_count = fields.Integer(
+        string='Related Records Count', compute='_compute_related_records_count')
 
     @api.depends('quantity', 'amount', 'rate')
     def _compute_total(self):
@@ -76,3 +78,9 @@ class HrPayslipLine(models.Model):
                     raise UserError(
                         _('You must set a contract to create a payslip line.'))
         return super(HrPayslipLine, self).create(vals_list)
+
+    def open_related_records(self):
+        return
+
+    def _compute_related_records_count(self):
+        self.update({'related_records_count': 0})

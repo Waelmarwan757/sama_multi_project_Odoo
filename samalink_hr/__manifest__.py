@@ -10,6 +10,8 @@
     'data': [
         'views/hr_employee.xml',
         'views/hr_contract.xml',
+        'views/hr_attendance.xml',
+        'views/hr_work_entry.xml',
     ],
     'installable': True,
     'application': False,

@@ -58,6 +58,33 @@
         </field>
     </record>
 
+    <record id="view_hr_incentives_payslip_list" model="ir.ui.view">
+        <field name="name">hr.incentive.payslip.list</field>
+        <field name="model">hr.incentive</field>
+        <field name="priority">999</field>
+        <field name="arch" type="xml">
+            <list string="HR Incentives" create="false" delete="false" edit="false">
+                <field name="type"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hr_incentives_payslip" model="ir.actions.act_window">
+        <field name="name">HR Incentives</field>
+        <field name="res_model">hr.incentive</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create HR Incentives records.
+            </p>
+        </field>
+        <field name="view_id" ref="view_hr_incentives_payslip_list"/>
+        <field name="domain">[('employee_id', '=', False)]</field>
+    </record>
+
     <menuitem id="menu_hr_incentives_root" name="Incentives"
               sequence="20"
               parent="hr.menu_hr_root"
