@@ -48,7 +48,7 @@ class HrPayslipLine(models.Model):
             from_date_midnight = datetime.combine(date_from, time.min)
             end_of_to_date = datetime.combine(date_to, time.max)
             action = self.env["ir.actions.actions"]._for_xml_id(
-                "samalink_hr.action_hr_rest_allow_list"
+                "samalink_hr.action_hr_rest_allow_list_payslip"
             )
             action['domain'] = [
                 ('employee_id', '=', employee_id.id),
