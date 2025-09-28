@@ -37,7 +37,7 @@ class HrPayslipLine(models.Model):
             return super(HrPayslipLine, self).open_related_records()
         elif self.salary_rule_id.code == 'PRESENT_DAYS':
             action = self.env["ir.actions.actions"]._for_xml_id(
-                "samalink_hr.action_hr_attendance_list"
+                "samalink_hr.action_hr_attendance_list_payslip"
             )
             action['domain'] = [
                 ('check_in', '>=', date_from), ('check_in', '<=', date_to),
