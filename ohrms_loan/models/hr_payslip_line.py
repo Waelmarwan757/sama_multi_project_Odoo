@@ -27,7 +27,7 @@ class HrPayslipLine(models.Model):
             date_to = self.slip_id.date_to
             employee_id = self.slip_id.employee_id
             action = self.env["ir.actions.actions"]._for_xml_id(
-                "ohrms_loan.hr_loan_line_action"
+                "ohrms_loan.hr_loan_line_action_payslip"
             )
             action['domain'] = [
                 ('date', '>=', date_from), ('date', '<=', date_to), ('paid', '=', False),
