@@ -40,6 +40,7 @@
     'data': [
         'security/hr_payroll_community_security.xml',
         'security/ir.model.access.csv',
+        'data/ir_exports.xml',
         'data/ir_sequence_data.xml',
         'data/hr_payroll_community_data.xml',
         'wizard/hr_payslips_employees_views.xml',
