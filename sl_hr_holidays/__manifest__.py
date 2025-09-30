@@ -6,10 +6,11 @@
     'author': 'Your Company',
     'website': 'https://yourcompany.com',
     'category': 'Human Resources',
-    'depends': ['base', 'hr_holidays'],
+    'depends': ['base', 'hr_holidays', 'samalink_hr'],
     'data': [
         'views/hr_leave_type.xml',
         'views/hr_leave.xml',
+        'views/hr_attendance.xml',
     ],
     'installable': True,
     'application': False,

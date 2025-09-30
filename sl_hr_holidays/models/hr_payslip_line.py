@@ -1,4 +1,9 @@
+import logging
+from datetime import datetime, time
 from odoo import models
+from odoo.osv import expression
+
+_logger = logging.getLogger(__name__)
 
 class HrPayslipLine(models.Model):
     _inherit = 'hr.payslip.line'
@@ -28,14 +33,34 @@ class HrPayslipLine(models.Model):
             date_from = self.slip_id.date_from
             date_to = self.slip_id.date_to
             employee_id = self.slip_id.employee_id
+            leave_dates_domain = self._get_leaves_dates_domain()
             action = self.env["ir.actions.actions"]._for_xml_id(
-                "sl_hr_holidays.action_hr_leave_payslip"
+                "samalink_hr.action_hr_attendance_list_payslip"
             )
-            action['domain'] = [
-                ('employee_id', '=', employee_id.id),
-                ('request_date_from', '>=', date_from),
-                ('request_date_to', '<=', date_to),
-                ('state', '=', 'validate'),
-                ('holiday_status_id.code', '=', 'LATE'),
-            ]
+            action['domain'] = expression.AND([
+                [('employee_id', '=', employee_id.id)],
+                leave_dates_domain
+            ])
             return action
+
+    def _get_leaves_dates_domain(self):
+        self.ensure_one()
+        date_from = self.slip_id.date_from
+        date_to = self.slip_id.date_to
+        employee_id = self.slip_id.employee_id
+        leaves = self.env['hr.leave'].search([
+            ('employee_id', '=', employee_id.id),
+            ('request_date_from', '>=', date_from),
+            ('request_date_to', '<=', date_to),
+            ('state', '=', 'validate'),
+            ('holiday_status_id.code', '=', 'LATE'),
+        ])
+        leave_dates_domains = []
+        for index, leave_date in enumerate(leaves.mapped('request_date_from')):
+            date_midnight = datetime.combine(leave_date, time.min)
+            end_of_date = datetime.combine(leave_date, time.max)
+            domain = [('check_in', '>=', date_midnight), ('check_in', '<=', end_of_date)]
+            leave_dates_domains.append(domain)
+        combined_domain = expression.OR(leave_dates_domains)
+        _logger.info("Leave dates domain: %s", combined_domain)
+        return combined_domain
