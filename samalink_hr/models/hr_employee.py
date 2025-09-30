@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, time, timedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
@@ -51,3 +52,51 @@ class HrEmployee(models.Model):
             'password': "1",
         }
         user = self.env['res.users'].sudo().create(vals)
+
+    def action_generate_absent_entries(self, start_date=None, end_date=None):
+        self.ensure_one()
+        if not start_date or not end_date:
+            start_date = fields.Date.today().replace(day=1)
+            end_date = fields.Date.today()
+        attendance_date_list = self._get_attendece_dates(start_date, end_date)
+        existing_absent_date_list = self._get_absent_dates(start_date, end_date)
+        current_date = start_date
+        vals_list = []
+        while current_date <= end_date:
+            if (current_date not in attendance_date_list) and (current_date not in existing_absent_date_list):
+                vals_list.append({
+                    'employee_id': self.id,
+                    'date': current_date,
+                    'reason': 'Generated absent entry'
+                })
+            current_date += timedelta(days=1)
+        if vals_list:
+            self.env['hr.absent.entry'].create(vals_list)
+
+    def _get_attendece_dates(self, date_from, date_to):
+        self.ensure_one()
+        date_midnight = datetime.combine(date_from, time.min)
+        end_of_date = datetime.combine(date_to, time.max)
+        domain = [('check_in', '>=', date_midnight), ('check_in', '<=', end_of_date)]
+        attendance_records = self.env['hr.attendance'].search([
+            ('employee_id', '=', self.id),
+            ('check_in', '>=', date_from),
+            ('check_out', '<=', date_to)
+        ])
+        return [date_time.date() for date_time in attendance_records.mapped('check_in')]
+
+    def _get_absent_dates(self, date_from, date_to):
+        self.ensure_one()
+        absent_entries = self.env['hr.absent.entry'].search([
+            ('employee_id', '=', self.id),
+            ('date', '>=', date_from),
+            ('date', '<=', date_to)
+        ])
+        return absent_entries.mapped('date')
+    
+    def action_view_absent_entries(self):
+        self.ensure_one()
+        action = self.env.ref('samalink_hr.action_hr_absent_entry').read()[0]
+        action['domain'] = [('employee_id', '=', self.id)]
+        action['context'] = {'default_employee_id': self.id}
+        return action

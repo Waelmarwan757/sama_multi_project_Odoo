@@ -10,7 +10,6 @@
     'data': [
         'views/hr_leave_type.xml',
         'views/hr_leave.xml',
-        'views/hr_attendance.xml',
     ],
     'installable': True,
     'application': False,

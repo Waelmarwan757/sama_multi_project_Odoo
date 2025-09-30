@@ -1,4 +1,3 @@
 from . import hr_leave_type
 from . import hr_leave
-from . import hr_attendance
 from . import hr_payslip_line

@@ -8,10 +8,12 @@
     'category': 'Human Resources',
     'depends': ['base', 'hr', 'samalink_security_groups', 'hr_contract'],
     'data': [
+        'security/ir.model.access.csv',
         'views/hr_employee.xml',
         'views/hr_contract.xml',
         'views/hr_attendance.xml',
         'views/hr_work_entry.xml',
+        'views/hr_absent_entry.xml',
     ],
     'installable': True,
     'application': False,

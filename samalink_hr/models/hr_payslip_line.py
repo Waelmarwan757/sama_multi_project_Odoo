@@ -9,7 +9,7 @@ class HrPayslipLine(models.Model):
             date_from = line.slip_id.date_from
             date_to = line.slip_id.date_to
             employee_id = line.slip_id.employee_id
-            if line.salary_rule_id.code not in ['PRESENT_DAYS', 'REST_ALLOW']:
+            if line.salary_rule_id.code not in ['PRESENT_DAYS', 'REST_ALLOW', 'ABSENT_PENALTY']:
                 super(HrPayslipLine, line)._compute_related_records_count()
             elif line.salary_rule_id.code == 'PRESENT_DAYS':
                 attendance_count = self.env['hr.attendance'].search_count(
@@ -27,6 +27,14 @@ class HrPayslipLine(models.Model):
                     ('work_entry_type_id.code', '=', 'REST100')
                 ])
                 line.update({'related_records_count': weekend_days})
+            elif line.salary_rule_id.code == 'ABSENT_PENALTY':
+                absent_entries_count = self.env['hr.absent.entry'].search_count([
+                     ('employee_id', '=', employee_id.id),
+                     ('date', '>=', date_from),
+                     ('date', '<=', date_to),
+                     ('leave_entry_id', '=', False)
+                ])
+                line.update({'related_records_count': absent_entries_count})
 
     def open_related_records(self):
         self.ensure_one()
@@ -56,4 +64,14 @@ class HrPayslipLine(models.Model):
                 ('date_stop', '<=', end_of_to_date),
                 ('work_entry_type_id.code', '=', 'REST100')
             ]
+            return action
+        elif self.salary_rule_id.code == 'ABSENT_PENALTY':
+            action = self.env.ref('samalink_hr.action_hr_absent_entry').read()[0]
+            action['domain'] = [
+                ('employee_id', '=', employee_id.id),
+                ('date', '>=', date_from),
+                ('date', '<=', date_to),
+                ('leave_entry_id', '=', False)
+            ]
+            action['context'] = {'default_employee_id': employee_id.id}
             return action
