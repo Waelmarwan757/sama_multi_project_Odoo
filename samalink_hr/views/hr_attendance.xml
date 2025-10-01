@@ -8,6 +8,8 @@
                 <field name="check_in"/>
                 <field name="check_out"/>
                 <field name="worked_hours"/>
+                <field name="late_check_in"/>
+                <field name="early_check_out"/>
                 <field name="has_late_permission" column_invisible="1"/>
                 <button name="action_open_related_leave" string="View Leave" invisible="not has_late_permission" type="object" class="oe_stat_button"/>
             </list>
