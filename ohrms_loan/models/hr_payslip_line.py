@@ -12,7 +12,7 @@ class HrPayslipLine(models.Model):
                 date_to = line.slip_id.date_to
                 employee_id = line.slip_id.employee_id
                 loan_lines_count = self.env['hr.loan.line'].search_count(
-                    [('date', '>=', date_from), ('date', '<=', date_to), ('paid', '=', False),
+                    [('date', '>=', date_from), ('date', '<=', date_to),
                      ('loan_id.employee_id', '=', employee_id.id),
                      ('loan_id.state', '=', 'approve')]
                 )
