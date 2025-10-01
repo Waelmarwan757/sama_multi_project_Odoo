@@ -41,7 +41,7 @@ class HrPayslipLine(models.Model):
         date_from = self.slip_id.date_from
         date_to = self.slip_id.date_to
         employee_id = self.slip_id.employee_id
-        if self.salary_rule_id.code not in ['PRESENT_DAYS', 'REST_ALLOW']:
+        if self.salary_rule_id.code not in ['PRESENT_DAYS', 'REST_ALLOW', 'ABSENT_PENALTY']:
             return super(HrPayslipLine, self).open_related_records()
         elif self.salary_rule_id.code == 'PRESENT_DAYS':
             action = self.env["ir.actions.actions"]._for_xml_id(
