@@ -73,5 +73,5 @@ class HrPayslipLine(models.Model):
                 ('date', '<=', date_to),
                 ('leave_entry_id', '=', False)
             ]
-            action['context'] = {'default_employee_id': employee_id.id}
+            action['context'] = {'default_employee_id': employee_id.id, 'initial_date': date_from}
             return action
