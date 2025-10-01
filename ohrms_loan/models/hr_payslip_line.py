@@ -30,7 +30,7 @@ class HrPayslipLine(models.Model):
                 "ohrms_loan.hr_loan_line_action_payslip"
             )
             action['domain'] = [
-                ('date', '>=', date_from), ('date', '<=', date_to), ('paid', '=', False),
+                ('date', '>=', date_from), ('date', '<=', date_to),
                 ('loan_id.employee_id', '=', employee_id.id),
                 ('loan_id.state', '=', 'approve')
             ]
