@@ -121,7 +121,9 @@
                         <button name="%(action_hr_payslip_line)d"
                                 class="oe_stat_button"
                                 icon="fa-money"
-                                type="action">
+                                type="action"
+                                groups="hr_payroll_community.group_hr_payroll_community_user"
+                                >
                             <field name="payslip_count" widget="statinfo"
                                    string="Payslip"
                                    help="Payslip Computation Details"/>
