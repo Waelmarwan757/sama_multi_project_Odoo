@@ -20,10 +20,13 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class HrLoan(models.Model):
@@ -98,6 +101,28 @@ class HrLoan(models.Model):
          ('approve', 'Approved'), ('refuse', 'Refused'), ('cancel', 'Canceled'),
          ], string="State", default='draft', help="The current state of the "
                                                   "loan request.", copy=False, tracking=True)
+
+    @api.constrains('employee_id', 'loan_amount')
+    def _check_max_loan_amount(self):
+        for loan in self:
+            max_loan = int(loan.employee_id.contract_id.wage) / 2
+            if not max_loan:
+                raise ValidationError(
+                    _("The employee does not have a valid contract "
+                      "with a defined wage."))
+            elif loan.loan_amount > max_loan:
+                raise ValidationError(
+                    _("The loan amount exceeds the maximum limit of %s "
+                      "for the employee.") % max_loan)
+
+    @api.constrains('date')
+    def _check_date(self):
+        today = fields.Date.today().day
+        _logger.info("Today's date: %s", today)
+        if today < 10 or today > 20:
+            raise ValidationError(
+                _("You can only create loan request between "
+                  "10th to 20th of the month."))
 
     def _compute_total_amount(self):
         """ Compute total loan amount,balance amount and total paid amount"""
