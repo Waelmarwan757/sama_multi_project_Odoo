@@ -16,6 +16,7 @@
                 <field name="company_id" groups="base.group_multi_company"
                        options="{'no_create': True}"/>
                 <field name="payslip_run_id" invisible="1"/>
+                <field name="work_location_id" optional="show"/>
             </list>
         </field>
     </record>
@@ -72,6 +73,7 @@
                         domain="[('state','=','done')]" help="Done Slip"/>
                 <field name="employee_id"/>
                 <field name="payslip_run_id"/>
+                <field name="work_location_id" string="Work Location" />
                 <group expand="0" string="Group By">
                     <filter string="Employees" name="employee_id"
                             context="{'group_by':'employee_id'}"/>
@@ -82,6 +84,7 @@
                             context="{'group_by':'company_id'}"/>
                     <filter string="States" name="state"
                             context="{'group_by':'state'}"/>
+                    <filter name="group_work_location" string="Work Location" domain="[]" context="{'group_by': 'work_location_id'}"/>
                 </group>
             </search>
         </field>

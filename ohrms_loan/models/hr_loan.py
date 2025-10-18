@@ -101,6 +101,7 @@ class HrLoan(models.Model):
          ('approve', 'Approved'), ('refuse', 'Refused'), ('cancel', 'Canceled'),
          ], string="State", default='draft', help="The current state of the "
                                                   "loan request.", copy=False, tracking=True)
+    work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
 
     @api.constrains('employee_id', 'loan_amount')
     def _check_max_loan_amount(self):

@@ -6,6 +6,7 @@ class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
     has_late_permission = fields.Boolean(string='Has Late Permission', compute='_compute_has_late_permission')
+    work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
 
     def _compute_has_late_permission(self):
         for attendance in self:

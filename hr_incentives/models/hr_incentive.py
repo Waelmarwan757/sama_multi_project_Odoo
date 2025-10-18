@@ -28,6 +28,7 @@ class HrIncentive(models.Model):
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled')
     ], string='Status', default='draft')
+    work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
 
     @api.depends('type', 'days', 'current_contract_id.wage')
     def _compute_amount(self):

@@ -1,5 +1,5 @@
 {
-    'name': 'Samalink HR',
+    'name': 'Samalink HR v1.0.0',
     'version': '1.0',
     'summary': 'HR Module for Samalink',
     'description': 'Custom HR functionalities for Samalink.',

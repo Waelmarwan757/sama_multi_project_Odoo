@@ -114,6 +114,7 @@ class HrPayslip(models.Model):
                                    string="Payslip Computation Details",
                                    help="Set Payslip Count")
     net_amount = fields.Float(string='Net Amount', compute='_compute_net_amount', store=True)
+    work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
     # is_officer = fields.Boolean(compute="_compute_is_officer")
 
     # @api.depends_context('uid')

@@ -152,6 +152,7 @@
                         <field name="name" readonly="state != 'draft'"/>
                         <field name="credit_note" readonly="state != 'draft'"/>
                         <field name="net_amount" readonly="1" invisible="not net_amount"/>
+                        <field name="work_location_id"/>
                     </group>
                     <notebook>
                         <page string="Worked Days &amp; Inputs">
