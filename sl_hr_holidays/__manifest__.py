@@ -11,6 +11,11 @@
         'views/hr_leave_type.xml',
         'views/hr_leave.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'sl_hr_holidays/static/src/**/*',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,
