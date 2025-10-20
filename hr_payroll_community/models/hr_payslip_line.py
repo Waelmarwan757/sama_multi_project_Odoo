@@ -55,7 +55,7 @@ class HrPayslipLine(models.Model):
                          help="Total amount for Payslip",
                          digits=dp.get_precision('Payroll'), store=True)
     related_records_count = fields.Integer(
-        string='Related Records Count', compute='_compute_related_records_count')
+        string='Related Records Count', compute='_compute_related_records_count', compute_sudo=True)
 
     @api.depends('quantity', 'amount', 'rate')
     def _compute_total(self):
