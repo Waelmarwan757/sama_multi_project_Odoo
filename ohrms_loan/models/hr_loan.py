@@ -119,11 +119,13 @@ class HrLoan(models.Model):
     @api.constrains('date')
     def _check_date(self):
         today = fields.Date.today().day
+        loan_after_day = int(self.env['ir.config_parameter'].get_param('ohrms_loan.loan_after_month_day', default=10))
+        loan_before_day = int(self.env['ir.config_parameter'].get_param('ohrms_loan.loan_before_month_day', default=20))
         _logger.info("Today's date: %s", today)
-        if today < 10 or today > 20:
+        if today < loan_after_day or today > loan_before_day:
             raise ValidationError(
                 _("You can only create loan request between "
-                  "10th to 20th of the month."))
+                  "%s to %s of the month.") % (loan_after_day, loan_before_day))
 
     def _compute_total_amount(self):
         """ Compute total loan amount,balance amount and total paid amount"""
@@ -142,13 +144,19 @@ class HrLoan(models.Model):
         """ Check whether any pending loan is for the employee and calculate
             the sequence
             :param values : Dictionary which contain fields and values"""
-        loan_count = self.env['hr.loan'].search_count(
+        pending_loan_count = self.env['hr.loan'].search_count(
             [('employee_id', '=', values['employee_id']),
              ('state', '=', 'approve'),
              ('balance_amount', '!=', 0)])
-        if loan_count:
+        if pending_loan_count:
             raise ValidationError(
                 _("The Employee has already a pending installment"))
+        draft_loan_count = self.env['hr.loan'].search_count(
+            [('employee_id', '=', values['employee_id']),
+             ('state', '=', 'draft')])
+        if draft_loan_count:
+            raise ValidationError(
+                _("The Employee has already a draft loan request"))
         else:
             values['name'] = self.env['ir.sequence'].get('hr.loan.seq') or ' '
             return super(HrLoan, self).create(values)
