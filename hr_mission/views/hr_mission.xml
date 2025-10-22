@@ -14,7 +14,7 @@
                     <button name="action_hr_approve" string="Approve" type="object" invisible="state != 'manager_approved'" class="btn-primary" groups="hr_mission.group_hr_mission_manager"/>
                     <button name="action_reject" id="hr_reject" string="Reject" type="object" invisible="state != 'manager_approved'" class="btn-secondary" groups="hr_mission.group_hr_mission_manager"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state != 'hr_approved'" groups="hr_mission.group_hr_mission_manager"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                 </header>
                 <sheet>
                     <group>
