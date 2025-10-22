@@ -48,6 +48,23 @@
         </field>
     </record>
 
+    <record id="view_hr_transfer_search" model="ir.ui.view">
+        <field name="name">hr.transfer.search</field>
+        <field name="model">hr.transfer</field>
+        <field name="arch" type="xml">
+            <search string="HR Transfers">
+                <field name="employee_id"/>
+                <field name="current_location_id" string="Work Location (current)"/>
+                <field name="new_location_id" string="Work Location (new)"/>
+                <filter string="Draft" name="filter_draft" domain="[('state','=','draft')]"/>
+                <filter string="Transferred" name="filter_done" domain="[('state','=','done')]"/>
+                <filter string="Cancelled" name="filter_cancel" domain="[('state','=','cancel')]"/>
+                <filter name="group_work_location" string="Work Location (current)" domain="[]" context="{'group_by': 'current_location_id'}"/>
+                <filter name="group_new_work_location" string="Work Location (new)" domain="[]" context="{'group_by': 'new_location_id'}"/>
+            </search>
+        </field>
+    </record>
+
     <record id="action_hr_transfer" model="ir.actions.act_window">
         <field name="name">HR Transfers</field>
         <field name="res_model">hr.transfer</field>

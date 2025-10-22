@@ -66,12 +66,30 @@
         <field name="arch" type="xml">
             <list string="HR Missions">
                 <field name="employee_id"/>
+                <field name="current_location_id"/>
                 <field name="mission_type"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="destination"/>
                 <field name="state"/>
             </list>
+        </field>
+    </record>
+
+    <record id="view_hr_mission_search" model="ir.ui.view">
+        <field name="name">hr.mission.search</field>
+        <field name="model">hr.mission</field>
+        <field name="arch" type="xml">
+            <search string="Search HR Missions">
+                <field name="employee_id"/>
+                <field name="current_location_id" string="Work Location" />
+                <field name="destination"/>
+                <filter name="filter_draft" string="Draft" domain="[('state','=','draft')]" />
+                <filter name="filter_submitted" string="Submitted" domain="[('state','=','confirmed')]" />
+                <filter name="filter_manager_approved" string="Manager Approved" domain="[('state','=','manager_approved')]" />
+                <filter name="filter_hr_approved" string="HR Approved" domain="[('state','=','hr_approved')]" />
+                <filter name="group_work_location" string="Work Location" domain="[]" context="{'group_by': 'current_location_id'}"/>
+            </search>
         </field>
     </record>
 
