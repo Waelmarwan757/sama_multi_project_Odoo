@@ -70,7 +70,7 @@ class HrLoan(models.Model):
                                  string="Loan Line",
                                  help="Details of installment lines "
                                       "associated with the loan.",
-                                 index=True)
+                                 index=True, tracking=True)
     company_id = fields.Many2one('res.company', string='Company',
                                  help="Company",
                                  default=lambda self: self.env.user.company_id)
@@ -86,22 +86,36 @@ class HrLoan(models.Model):
                                help="Loan amount", tracking=True)
     total_amount = fields.Float(string="Total Amount", store=True,
                                 readonly=True, compute='_compute_total_amount',
-                                help="The total amount of the loan")
+                                help="The total amount of the loan", tracking=True)
     balance_amount = fields.Float(string="Balance Amount", store=True,
                                   compute='_compute_total_amount',
-                                  help="""The remaining balance amount of the 
-                                  loan after deducting 
-                                  the total paid amount.""")
+                                  help="""The remaining balance amount of the
+                                  loan after deducting
+                                  the total paid amount.""", tracking=True)
     total_paid_amount = fields.Float(string="Total Paid Amount", store=True,
                                      compute='_compute_total_amount',
                                      help="The total amount that has been "
-                                          "paid towards the loan.")
+                                          "paid towards the loan.", tracking=True)
     state = fields.Selection(
         [('draft', 'Draft'), ('waiting_approval_1', 'Submitted'),
          ('approve', 'Approved'), ('refuse', 'Refused'), ('cancel', 'Canceled'),
          ], string="State", default='draft', help="The current state of the "
                                                   "loan request.", copy=False, tracking=True)
     work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
+    active = fields.Boolean(default=True, tracking=True)
+    deleted = fields.Boolean(default=False)
+
+    def action_archive(self):
+        for record in self:
+            if record.state not in ['draft', 'cancel']:
+                raise ValidationError("You cannot delete a loan which is not in draft or cancelled state.")
+        return super(HrLoan, self).action_archive()
+
+    def action_unarchive(self):
+        for record in self:
+            if record.deleted:
+                raise ValidationError("You cannot unarchive a deleted loan.")
+        return super(HrLoan, self).action_unarchive()
 
     @api.constrains('employee_id', 'loan_amount')
     def _check_max_loan_amount(self):
@@ -207,4 +221,7 @@ class HrLoan(models.Model):
                 raise UserError(_(
                     'You cannot delete a loan which is not in draft '
                     'or cancelled state'))
-        return super(HrLoan, self).unlink()
+        for record in self:
+            record.message_post(body="Loan record has been deleted.")
+        self.write({'active': False, 'deleted': True})
+        return True

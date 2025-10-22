@@ -30,6 +30,29 @@ class HrIncentive(models.Model):
         ('cancelled', 'Cancelled')
     ], string='Status', default='draft', tracking=True)
     work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
+    active = fields.Boolean(default=True, tracking=True)
+    deleted = fields.Boolean(default=False)
+
+    def action_archive(self):
+        for record in self:
+            if record.state not in ['draft', 'cancelled']:
+                raise ValidationError("You cannot delete an incentive which is not in draft or cancelled state.")
+        return super(HrIncentive, self).action_archive()
+
+    def action_unarchive(self):
+        for record in self:
+            if record.deleted:
+                raise ValidationError("You cannot unarchive a deleted incentive.")
+        return super(HrIncentive, self).action_unarchive()
+
+    def unlink(self):
+        for record in self:
+            if record.state not in ['draft', 'cancelled']:
+                raise ValidationError("You cannot delete an incentive which is not in draft or cancelled state.")
+        self.write({'active': False, 'deleted': True})
+        for record in self:
+            record.message_post(body="Incentive record has been deleted.")
+        return True
 
     @api.depends('type', 'days', 'current_contract_id.wage')
     def _compute_amount(self):
