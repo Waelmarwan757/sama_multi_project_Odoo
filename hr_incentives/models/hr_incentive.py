@@ -4,6 +4,7 @@ from odoo.exceptions import ValidationError
 
 class HrIncentive(models.Model):
     _name = 'hr.incentive'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'HR Incentive'
     _rec_name = 'employee_id'
 
@@ -16,18 +17,18 @@ class HrIncentive(models.Model):
     based_on = fields.Selection([
         ('days', 'Days'),
         ('amount', 'Amount')
-    ], string='Based On', required=True, default='days')
-    days = fields.Integer(string='Days')
-    amount = fields.Float(string='Amount', compute="_compute_amount", store=True, readonly=False)
-    date = fields.Date(string='Date', default=fields.Date.today)
-    description = fields.Text(string='Description')
+    ], string='Based On', required=True, default='days', tracking=True)
+    days = fields.Integer(string='Days', tracking=True)
+    amount = fields.Float(string='Amount', compute="_compute_amount", store=True, readonly=False, tracking=True)
+    date = fields.Date(string='Date', default=fields.Date.today, tracking=True)
+    description = fields.Text(string='Description', tracking=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('validated', 'First Approval'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled')
-    ], string='Status', default='draft')
+    ], string='Status', default='draft', tracking=True)
     work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
 
     @api.depends('type', 'days', 'current_contract_id.wage')
