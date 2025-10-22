@@ -54,7 +54,7 @@ class HrLoan(models.Model):
     date = fields.Date(string="Date", default=fields.Date.today(),
                        readonly=True, help="Date of the loan request")
     employee_id = fields.Many2one('hr.employee', string="Employee",
-                                  required=True, help="Employee Name")
+                                  required=True, help="Employee Name", tracking=True)
     department_id = fields.Many2one('hr.department',
                                     related="employee_id.department_id",
                                     readonly=True,
@@ -65,7 +65,7 @@ class HrLoan(models.Model):
                                  help="Number of installments", tracking=True)
     payment_date = fields.Date(string="Payment Start Date", required=True,
                                default=fields.Date.today(),
-                               help="Date of the payment")
+                               help="Date of the payment", tracking=True)
     loan_lines = fields.One2many('hr.loan.line', 'loan_id',
                                  string="Loan Line",
                                  help="Details of installment lines "
