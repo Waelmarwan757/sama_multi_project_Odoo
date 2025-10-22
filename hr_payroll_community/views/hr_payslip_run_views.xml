@@ -78,12 +78,14 @@
         <field name="arch" type="xml">
             <form string="Payslips Batches">
                 <header>
-                    <button name="close_payslip_run" type="object"
-                            string="Close" invisible="state != 'draft'"
-                            class="oe_highlight"/>
                     <button name="%(hr_payslip_by_employees_action)d"
                             type="action" invisible="state != 'draft'"
                             string="Generate Payslips" class="oe_highlight"/>
+                    <button name="action_bulk_compute_payslips"
+                            type="object" string="Compute Payslips" invisible="not slip_ids"/>
+                    <button name="close_payslip_run" type="object"
+                            string="Close" invisible="state != 'draft'"
+                            />
                     <button string="Set to Draft" name="action_payslip_run"
                             type="object" invisible="state != 'close'"/>
                     <field name="state" widget="statusbar"/>

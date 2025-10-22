@@ -22,7 +22,7 @@
 #############################################################################
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from odoo import fields, models
+from odoo import fields, models, _
 
 
 class HrPayslipRun(models.Model):
@@ -81,3 +81,15 @@ class HrPayslipRun(models.Model):
         action['context'] = {'create': False}
         action['view_mode'] = 'pivot,form'
         return action
+
+    def action_bulk_compute_payslips(self):
+        self.slip_ids.action_compute_sheet()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Success"),
+                'type': 'success',
+                'message': _("All payslips have been successfully computed."),
+            }
+        }
