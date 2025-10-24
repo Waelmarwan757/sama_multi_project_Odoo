@@ -18,7 +18,7 @@ class HrIncentive(models.Model):
         ('days', 'Days'),
         ('amount', 'Amount')
     ], string='Based On', required=True, default='days', tracking=True)
-    days = fields.Integer(string='Days', tracking=True)
+    days = fields.Float(string='Days', tracking=True)
     amount = fields.Float(string='Amount', compute="_compute_amount", store=True, readonly=False, tracking=True)
     date = fields.Date(string='Date', default=fields.Date.today, tracking=True)
     description = fields.Text(string='Description', tracking=True)
