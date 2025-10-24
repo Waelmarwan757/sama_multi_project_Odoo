@@ -1,0 +1,88 @@
+<odoo>
+    <record id="view_hr_attendance_middleware_list" model="ir.ui.view">
+        <field name="name">hr.attendance.middleware.list</field>
+        <field name="model">hr.attendance.middleware</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="employee_id"/>
+                <field name="date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hr_attendance_middleware_form" model="ir.ui.view">
+        <field name="name">hr.attendance.middleware.form</field>
+        <field name="model">hr.attendance.middleware</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Working Time">
+                            <field name="working_time_ids">
+                                <list editable="bottom">
+                                    <field name="calendar_id" string="Schedule" optional="show"/>
+                                    <field name="hour_from" widget="float_civilian_time_selection"/>
+                                    <field name="hour_to" widget="float_civilian_time_selection"/>
+                                    <field name="dayofweek" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Work Entries">
+                            <field name="work_entry_ids">
+                                <list editable="bottom">
+                                    <field name="work_entry_type_id"/>
+                                    <field name="date_start"/>
+                                    <field name="date_stop"/>
+                                    <field name="duration" string="Type" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Attendances">
+                            <separator string="ZK"/>
+                            <field name="zk_attendance_ids">
+                                <list editable="bottom">
+                                    <field name="punch_time"/>
+                                    <field name="punch_state"/>
+                                    <field name="zk_id" optional="hide"/>
+                                </list>
+                            </field>
+                            <separator string="Odoo"/>
+                            <field name="hr_attendance_id"/>
+                        </page>
+                        <page string="Checkings">
+                            <group>
+                                <field name="check_in_computed"/>
+                                <field name="check_out_computed"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hr_attendance_middleware" model="ir.actions.act_window">
+        <field name="name">Attendance Middleware</field>
+        <field name="res_model">hr.attendance.middleware</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_hr_attendance_middleware_root"
+                name="Attendance Middleware"
+                parent="hr.menu_hr_root"
+                sequence="100"/>
+
+    <menuitem id="menu_hr_attendance_middleware"
+                name="Attendance Middleware"
+                parent="menu_hr_attendance_middleware_root"
+                action="action_hr_attendance_middleware"
+                sequence="10"/>
+</odoo>

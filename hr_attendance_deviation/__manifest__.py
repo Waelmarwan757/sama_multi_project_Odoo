@@ -8,11 +8,13 @@
     'category': 'Human Resources',
     'depends': ['hr_attendance', 'hr_work_entry', 'hr_payroll_community', 'hr_contract', 'hr_zk_api_attendance'],
     'data': [
+        'security/ir.model.access.csv',
         'data/hr_salary_rule.xml',
         'data/ir_cron.xml',
         'views/hr_attendance.xml',
         'views/hr_contract.xml',
         'views/hr_payslip.xml',
+        'views/hr_attendance_middleware.xml',
     ],
     'installable': True,
     'application': False,
