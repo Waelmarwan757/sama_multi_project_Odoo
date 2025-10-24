@@ -57,15 +57,15 @@ class HrTransfer(models.Model):
             if record.new_parent_id:
                 record.employee_id.parent_id = record.new_parent_id.id
             else:
-                record.post_message(body="No new manager assigned during transfer.")
+                record.message_post(body="No new manager assigned during transfer.")
             if record.new_leave_manager_id:
                 record.employee_id.leave_manager_id = record.new_leave_manager_id.id
             else:
-                record.post_message(body="No new leave approver assigned during transfer.")
+                record.message_post(body="No new leave approver assigned during transfer.")
             if record.new_attendance_manager_id:
                 record.employee_id.attendance_manager_id = record.new_attendance_manager_id.id
             else:
-                record.post_message(body="No new attendance approver assigned during transfer.")
+                record.message_post(body="No new attendance approver assigned during transfer.")
         self.write({'state': 'done'})
 
     def action_cancel(self):
