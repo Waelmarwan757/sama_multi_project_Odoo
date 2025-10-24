@@ -21,9 +21,9 @@
                         <group string="Employee Information">
                             <field name="employee_id" invisible="1" force_save="1"/>
                             <field name="employee_id" groups="hr_mission.group_hr_mission_officer" readonly="state != 'draft'"/>
-                            <field name="department_id"/>
-                            <field name="current_location_id"/>
-                            <field name="manager_id"/>
+                            <field name="department_id" options="{'no_open': True}"/>
+                            <field name="current_location_id" options="{'no_open': True}"/>
+                            <field name="manager_id" options="{'no_open': True}"/>
                         </group>
                         <group string="Mission Details">
                             <field name="mission_type" readonly="state != 'draft'"/>
@@ -88,6 +88,8 @@
                 <filter name="filter_submitted" string="Submitted" domain="[('state','=','confirmed')]" />
                 <filter name="filter_manager_approved" string="Manager Approved" domain="[('state','=','manager_approved')]" />
                 <filter name="filter_hr_approved" string="HR Approved" domain="[('state','=','hr_approved')]" />
+                <filter name="filter_manager_pending" string="Waiting for Me (Manager)" groups="hr_mission.group_hr_mission_officer" domain="[('state','=','confirmed'), ('manager_id.user_id','=',uid)]" />
+                <filter name="filter_hr_pending" string="Waiting for Me (HR)" groups="hr_mission.group_hr_mission_manager" domain="[('state','=','manager_approved')]" />
                 <filter name="group_work_location" string="Work Location" domain="[]" context="{'group_by': 'current_location_id'}"/>
             </search>
         </field>
@@ -97,6 +99,7 @@
         <field name="name">HR Missions</field>
         <field name="res_model">hr.mission</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_manager_pending': 1, 'search_default_filter_hr_pending': 1}</field>
     </record>
 
     <menuitem id="menu_hr_mission" name="Missions" parent="hr.menu_hr_root" action="action_hr_mission" sequence="10"/>

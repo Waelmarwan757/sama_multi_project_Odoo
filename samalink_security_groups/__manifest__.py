@@ -15,6 +15,7 @@
         'menuitems_whitelist', 
         'hr_work_entry',
         'ohrms_loan',
+        'hr_mission',
     ],
     'data': [
         'views/hr_attendance.xml',

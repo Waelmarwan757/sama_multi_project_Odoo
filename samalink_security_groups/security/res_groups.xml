@@ -8,6 +8,7 @@
             <field name="category_id" ref="module_category_samalink_hr" />
             <field name="implied_ids" eval="[
                 (4, ref('hr_attendance.group_hr_attendance_own_reader')),
+                (4, ref('hr_mission.group_hr_mission_user')),
             ]" />
             <field name="whitelisted_menu_ids" eval="[
                 (4, ref('mail.menu_root_discuss')),
@@ -16,6 +17,7 @@
                 (4, ref('samalink_security_groups.menu_my_payslips')),
                 (4, ref('samalink_security_groups.hr_employee_menu_my_info')),
                 (4, ref('ohrms_loan.hr_loan_menu_requests')),
+                (4, ref('hr_mission.menu_hr_mission')),
             ]" />
             <field name="menu_access" eval="[
                 (4, ref('samalink_security_groups.menu_my_attendances')),

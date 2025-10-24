@@ -12,6 +12,7 @@
     'data': [
         'views/hr_mission.xml',
         'security/ir_groups.xml',
+        'security/ir_rule.xml',
         'security/ir.model.access.csv',
     ],
     'installable': True,
