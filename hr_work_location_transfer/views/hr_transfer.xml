@@ -16,11 +16,23 @@
                     <group>
                         <group string="Employee Information">
                             <field name="employee_id" readonly="state != 'draft'"/>
-                            <field name="current_location_id" readonly="state != 'draft'"/>
+                            <field name="current_location_id"/>
                         </group>
                         <group string="Transfer Details">
                             <field name="date" readonly="state != 'draft'"/>
                             <field name="new_location_id" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Management Information">
+                            <field name="current_parent_id"/>
+                            <field name="current_leave_manager_id"/>
+                            <field name="current_attendance_manager_id"/>
+                        </group>
+                        <group string="New Management Information">
+                            <field name="new_parent_id" readonly="state != 'draft'"/>
+                            <field name="new_leave_manager_id" readonly="state != 'draft'"/>
+                            <field name="new_attendance_manager_id" readonly="state != 'draft'"/>
                         </group>
                     </group>
                     <notebook>

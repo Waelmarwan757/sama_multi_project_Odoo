@@ -10,7 +10,13 @@ class HrTransfer(models.Model):
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True, tracking=True)
     date = fields.Date(string='Transfer Date', required=True, default=fields.Date.context_today, tracking=True)
     current_location_id = fields.Many2one('hr.work.location', related='employee_id.work_location_id', string='From Location', store=True, depends=['employee_id'])
+    current_parent_id = fields.Many2one('hr.employee', related='employee_id.parent_id', store=True, string='Current Manager', depends=['employee_id'])
+    current_leave_manager_id = fields.Many2one('res.users', related='employee_id.leave_manager_id', store=True, string='Current Leave Approver', depends=['employee_id'])
+    current_attendance_manager_id = fields.Many2one('res.users', related='employee_id.attendance_manager_id', store=True, string='Current Attendance Approver', depends=['employee_id'])
     new_location_id = fields.Many2one('hr.work.location', string='To Location', required=True, tracking=True)
+    new_parent_id = fields.Many2one('hr.employee', string='New Manager', domain="[('work_location_id', '=', new_location_id)]", tracking=True)
+    new_leave_manager_id = fields.Many2one('res.users', string='New Leave Approver', domain="[('work_location_id', '=', new_location_id)]", tracking=True)
+    new_attendance_manager_id = fields.Many2one('res.users', string='New Attendance Approver', domain="[('work_location_id', '=', new_location_id)]", tracking=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         # ('confirmed', 'Confirmed'),
@@ -18,6 +24,12 @@ class HrTransfer(models.Model):
         ('cancel', 'Cancelled')
     ], string='Status', default='draft', tracking=True)
     reason = fields.Text(string='Reason for Transfer', required=True, tracking=True)
+
+    @api.onchange('new_parent_id')
+    def _onchange_new_parent(self):
+        for record in self:
+            record.new_leave_manager_id = record.new_parent_id.user_id.id
+            record.new_attendance_manager_id = record.new_parent_id.user_id.id
 
     @api.constrains('new_location_id')
     def _check_different_location(self):
@@ -42,6 +54,12 @@ class HrTransfer(models.Model):
     def action_done(self):
         for record in self:
             record.employee_id.work_location_id = record.new_location_id.id
+            if record.new_parent_id:
+                record.employee_id.parent_id = record.new_parent_id.id
+            if record.new_leave_manager_id:
+                record.employee_id.leave_manager_id = record.new_leave_manager_id.id
+            if record.new_attendance_manager_id:
+                record.employee_id.attendance_manager_id = record.new_attendance_manager_id.id
         self.write({'state': 'done'})
 
     def action_cancel(self):
