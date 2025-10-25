@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 import pytz
 from odoo import models, fields, api, Command
+from odoo.addons.hr_attendance_deviation.tools import Converter
 
 _logger = logging.getLogger(__name__)
 
@@ -20,6 +21,8 @@ class HrAttendanceMiddleware(models.Model):
     zk_attendance_ids = fields.Many2many('zk.attendance', string='ZK Attendances', compute='_compute_zk_attendances')
     check_in_computed = fields.Datetime(string='Check In (result)', compute='_compute_checkings')
     check_out_computed = fields.Datetime(string='Check Out (result)', compute='_compute_checkings')
+    best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Best Work Time', compute='_compute_best_work_time')
+    is_check_in_close_to_start = fields.Boolean(string='Check-In Close to Start', compute='_compute_is_check_in_close_to_start', help='Indicates if the check-in time is closer to the start of the shift than to the end.')
 
     @api.depends('employee_id', 'date')
     def _compute_hr_attendance(self):
@@ -101,17 +104,78 @@ class HrAttendanceMiddleware(models.Model):
         self.ensure_one()
         punch_datetimes = []
         for punch_time in self.zk_attendance_ids.mapped('punch_time'):
-            punch_datetime = self._get_naive_datetime(punch_time)
+            time_obj = datetime.strptime(punch_time, "%H:%M").time()
+            punch_datetime = self._convert_to_gmt_naive(self.date, time_obj)
             punch_datetimes.append(punch_datetime)
         return punch_datetimes
 
-    def _get_naive_datetime(self, punch_time_str):
-        """Convert att_date and punch_time strings to a native datetime object in GMT"""
-        cairo_tz = pytz.timezone("Africa/Cairo")
-        gmt_tz = pytz.timezone("UTC")
-        date_obj = self.date
-        time_obj = datetime.strptime(punch_time_str, "%H:%M").time()
-        naive_datetime = datetime.combine(date_obj, time_obj)
-        localized_datetime = cairo_tz.localize(naive_datetime)
-        gmt_datetime = localized_datetime.astimezone(gmt_tz)
-        return gmt_datetime.replace(tzinfo=None)
+    @api.depends('working_time_ids', 'check_in_computed')
+    def _compute_best_work_time(self):
+        for record in self:
+            weekday_attendances = record.working_time_ids
+            date = record.date
+            closest_shift = None
+            closest_to = 'start'
+            lowest_time_diff = float('inf')
+            for shift in weekday_attendances:
+                shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(shift, date)
+
+                # Check is closest to shift start or shift end
+                if record.check_in_computed:
+                    time_diff_start = abs((record.check_in_computed - shift_start_datetime).total_seconds())
+                    time_diff_end = abs((record.check_in_computed - shift_end_datetime).total_seconds())
+                    min_diff = min(time_diff_start, time_diff_end)
+                    if min_diff < lowest_time_diff:
+                        lowest_time_diff = min_diff
+                        closest_shift = shift.id
+                    if min_diff == time_diff_start:
+                        closest_to = 'start'
+                    else:
+                        closest_to = 'end'
+                    
+            record.best_work_time_id = closest_shift
+
+    @api.depends('best_work_time_id', 'check_in_computed', 'date')
+    def _compute_is_check_in_close_to_start(self):
+        for record in self:
+            is_close = False
+            if record.best_work_time_id and record.check_in_computed:
+                shift = record.best_work_time_id
+                date = record.date
+                shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(shift, date)
+                time_diff_start = abs((record.check_in_computed - shift_start_datetime).total_seconds())
+                time_diff_end = abs((record.check_in_computed - shift_end_datetime).total_seconds())
+                is_close = time_diff_start < time_diff_end
+            record.is_check_in_close_to_start = is_close
+
+    def _get_shift_datetimes(self, shift, date):
+        shift_hour_from_time = self._convert_float_to_time(shift.hour_from)
+        shift_hour_to_time = self._convert_float_to_time(shift.hour_to)
+        shift_start_datetime = self._convert_to_gmt_naive(date, shift_hour_from_time)
+        shift_end_datetime = self._convert_to_gmt_naive(date, shift_hour_to_time)
+        return shift_start_datetime, shift_end_datetime
+
+    def _convert_float_to_time(self, float_time):
+        return Converter.float_to_time_obj(float_time)
+
+    def _convert_to_gmt_naive(self, date_obj, time_obj):
+        return Converter.date_time_to_gmt_naive(date_obj, time_obj)
+
+    def action_fix_work_entries(self):
+        for record in self:
+            min_date_start = None
+            max_date_stop = None
+            start_work_entry = None
+            end_work_entry = None
+            hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
+            for work_entry in record.work_entry_ids:
+                if not min_date_start or work_entry.date_start < min_date_start:
+                    min_date_start = work_entry.date_start
+                    start_work_entry = work_entry
+                if not max_date_stop or work_entry.date_stop > max_date_stop:
+                    max_date_stop = work_entry.date_stop
+                    end_work_entry = work_entry
+            if start_work_entry:
+                start_work_entry.date_start = record._convert_to_gmt_naive(record.date, hour_from_time)
+            if end_work_entry:
+                end_work_entry.date_stop = record._convert_to_gmt_naive(record.date, hour_to_time)

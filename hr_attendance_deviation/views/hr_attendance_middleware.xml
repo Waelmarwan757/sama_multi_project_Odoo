@@ -15,6 +15,9 @@
         <field name="model">hr.attendance.middleware</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button type="object" class="btn btn-primary" name="action_fix_work_entries" string="Fix Work Entries"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -34,6 +37,16 @@
                                     <field name="dayofweek" optional="hide"/>
                                 </list>
                             </field>
+                            <separator string="Best Work Time"/>
+                            <field name="best_work_time_id">
+                                <list>
+                                    <field name="calendar_id" string="Schedule" optional="show"/>
+                                    <field name="hour_from" widget="float_civilian_time_selection"/>
+                                    <field name="hour_to" widget="float_civilian_time_selection"/>
+                                </list>
+                            </field>
+                            <label for="is_check_in_close_to_start" string=" (Valid)" invisible="not is_check_in_close_to_start"/>
+                            <field name="is_check_in_close_to_start" invisible="1"/>
                         </page>
                         <page string="Work Entries">
                             <field name="work_entry_ids">
