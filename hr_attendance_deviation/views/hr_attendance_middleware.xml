@@ -16,7 +16,9 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button type="object" class="btn btn-primary" name="action_fix_work_entries" string="Fix Work Entries"/>
+                    <button type="object" name="action_fix_work_entries" string="Fix Work Entries"/>
+                    <button type="object" name="action_adjust_checkings" string="Adjust Checkings"/>
+                    <button type="object" name="action_adjust_or_create_hr_attendance" string="Adjust or Create Attendance"/>
                 </header>
                 <sheet>
                     <group>
@@ -29,6 +31,10 @@
                     </group>
                     <notebook>
                         <page string="Working Time">
+                            <div>
+                                <i class="fa fa-exclamation-circle text-info"></i>
+                                <span class="text-muted">To adjust work entries and to adjust checkings.</span>
+                            </div>
                             <field name="working_time_ids">
                                 <list editable="bottom">
                                     <field name="calendar_id" string="Schedule" optional="show"/>
@@ -49,6 +55,10 @@
                             <field name="is_check_in_close_to_start" invisible="1"/>
                         </page>
                         <page string="Work Entries">
+                            <div>
+                                <i class="fa fa-exclamation-circle text-info"></i>
+                                <span class="text-muted">To calculate overtime correctly.</span>
+                            </div>
                             <field name="work_entry_ids">
                                 <list editable="bottom">
                                     <field name="work_entry_type_id"/>
@@ -71,9 +81,15 @@
                             <field name="hr_attendance_id"/>
                         </page>
                         <page string="Checkings">
-                            <group>
+                            <group string="Original Checkings">
                                 <field name="check_in_computed"/>
                                 <field name="check_out_computed"/>
+                            </group>
+                            <group string="Adjusted Checkings">
+                                <field name="check_in_final"/>
+                                <field name="late_check_in" widget="float_time" invisible="not late_check_in"/>
+                                <field name="check_out_final"/>
+                                <field name="early_check_out" widget="float_time" invisible="not early_check_out"/>
                             </group>
                         </page>
                     </notebook>

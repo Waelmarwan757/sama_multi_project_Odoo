@@ -166,10 +166,12 @@ class ZkAttendance(models.Model):
         return gmt_datetime.replace(tzinfo=None)
 
     def cron_auto_link_hr_attendance(self):
+        """Implemented in hr_attendance_deviation module."""
         """Cron job to automatically link HR attendance"""
-        not_linked = self.search([('hr_attendance_id', '=', False)])
-        if not_linked:
-            not_linked.action_link_hr_attendance()
-            _logger.info(f"Linked {len(not_linked)} ZK attendance records to HR attendance.")
-        else:
-            _logger.info("No ZK attendance records to link to HR attendance.")
+        pass
+        # not_linked = self.search([('hr_attendance_id', '=', False)])
+        # if not_linked:
+            # not_linked.action_link_hr_attendance()
+            # _logger.info(f"Linked {len(not_linked)} ZK attendance records to HR attendance.")
+        # else:
+            # _logger.info("No ZK attendance records to link to HR attendance.")

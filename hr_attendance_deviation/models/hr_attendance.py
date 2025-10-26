@@ -9,48 +9,44 @@ _logger = logging.getLogger(__name__)
 class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
-    work_entry_id = fields.Many2one(
-        'hr.work.entry',
-        compute='_compute_work_entry_id',
-        store=True,
-        string='Work Entry',
-        help='Link to the work entry associated with this attendance record.',
-    )
-    is_outside_main_shift = fields.Boolean(
-        string='Outside Main Shift',
-        compute='_compute_is_outside_main_shift',
-        help='Indicates whether the attendance is outside the main shift hours.',
-        store=True,
-    )
-    expected_check_in = fields.Datetime(
-        string='Expected',
-        compute='_compute_expected_check_time',
-        store=True,
-        help='Expected check-in time based on the work entry.',
-    )
+    # work_entry_id = fields.Many2one(
+        # 'hr.work.entry',
+        # compute='_compute_work_entry_id',
+        # store=True,
+        # string='Work Entry',
+        # help='Link to the work entry associated with this attendance record.',
+    # )
+    # is_outside_main_shift = fields.Boolean(
+        # string='Outside Main Shift',
+        # compute='_compute_is_outside_main_shift',
+        # help='Indicates whether the attendance is outside the main shift hours.',
+        # store=True,
+    # )
+    # expected_check_in = fields.Datetime(
+        # string='Expected',
+        # compute='_compute_expected_check_time',
+        # store=True,
+        # help='Expected check-in time based on the work entry.',
+    # )
     late_check_in = fields.Float(
         string='Late',
-        compute='_compute_late_check_in',
-        store=True,
         help='Time in hours that the employee checked in late.',
     )
-    expected_check_out = fields.Datetime(
-        string='Expected',
-        compute='_compute_expected_check_time',
-        store=True,
-        help='Expected check-out time based on the work entry.',
-    )
+    # expected_check_out = fields.Datetime(
+        # string='Expected',
+        # compute='_compute_expected_check_time',
+        # store=True,
+        # help='Expected check-out time based on the work entry.',
+    # )
     early_check_out = fields.Float(
         string='Early',
-        compute='_compute_early_check_out',
-        store=True,
         help='Time in hours that the employee checked out early.',
     )
-    invalid_corrected = fields.Boolean(
-        string='Corrected',
-        default=False,
-        help='Indicates whether the invalid attendance record has been corrected.',
-    )
+    # invalid_corrected = fields.Boolean(
+        # string='Corrected',
+        # default=False,
+        # help='Indicates whether the invalid attendance record has been corrected.',
+    # )
 
     @api.depends('check_in', 'check_out')
     def _compute_work_entry_id(self):

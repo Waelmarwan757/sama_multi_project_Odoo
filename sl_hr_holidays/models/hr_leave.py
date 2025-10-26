@@ -62,9 +62,10 @@ class HrLeave(models.Model):
 
     @api.constrains('request_date_from', 'holiday_status_id')
     def _check_request_offset(self):
+        is_admin = self.env.user.has_group('base.group_system')
         today = fields.Date.context_today(self)
         requests = self.filtered(lambda r: r.holiday_status_id.enable_request_offset)
         for record in requests:
             limit_date = record.request_date_from - timedelta(days=record.holiday_status_id.request_offset)
-            if today > limit_date:
+            if today > limit_date and not is_admin:
                 raise ValidationError(f"The leave request must be at least on or before {limit_date}.")

@@ -10,7 +10,7 @@ class ResourceCalendarAttendance(models.Model):
         for record in self:
             default_name = record.name
             hour_from_time, hour_to_time = record._get_time_objects()
-            record.display_name = f"{record.calendar_id.name} ({hour_from_time} - {hour_to_time}) {default_name}"
+            record.display_name = f"{record.calendar_id.name} ({hour_from_time.strftime('%I:%M %p')} - {hour_to_time.strftime('%I:%M %p')}) {default_name}"
 
     def _get_time_objects(self):
         self.ensure_one()

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from odoo import models, fields, api, Command
 from odoo.addons.hr_attendance_deviation.tools import Converter
@@ -19,10 +19,42 @@ class HrAttendanceMiddleware(models.Model):
     working_time_ids = fields.Many2many('resource.calendar.attendance', string='Working Times', compute='_compute_working_times')
     work_entry_ids = fields.Many2many('hr.work.entry', string='Work Entries', compute='_compute_work_entries')
     zk_attendance_ids = fields.Many2many('zk.attendance', string='ZK Attendances', compute='_compute_zk_attendances')
-    check_in_computed = fields.Datetime(string='Check In (result)', compute='_compute_checkings')
-    check_out_computed = fields.Datetime(string='Check Out (result)', compute='_compute_checkings')
+    check_in_computed = fields.Datetime(string='In', compute='_compute_checkings')
+    check_out_computed = fields.Datetime(string='Out', compute='_compute_checkings')
     best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Best Work Time', compute='_compute_best_work_time')
     is_check_in_close_to_start = fields.Boolean(string='Check-In Close to Start', compute='_compute_is_check_in_close_to_start', help='Indicates if the check-in time is closer to the start of the shift than to the end.')
+
+    # Final to adjust fields
+    check_in_final = fields.Datetime(string='In', readonly=True)
+    check_out_final = fields.Datetime(string='Out', readonly=True)
+
+    # Final computed fields
+    late_check_in = fields.Float(
+        string='Late ',
+        compute='_compute_late_early_times',
+        store=True,
+        help='Time in hours that the employee checked in late.',
+    )
+    early_check_out = fields.Float(
+        string='Early',
+        compute='_compute_late_early_times',
+        store=True,
+        help='Time in hours that the employee checked out early.',
+    )
+
+    @api.depends('check_in_final', 'check_out_final', 'best_work_time_id', 'date')
+    def _compute_late_early_times(self):
+        for record in self:
+            late_duration = 0
+            early_duration = 0
+            if record.best_work_time_id and record.date:
+                shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(record.best_work_time_id, record.date)
+                if record.check_in_final:
+                    late_duration = (record.check_in_final - shift_start_datetime).total_seconds() / 60.0 / 60.0
+                if record.check_out_final:
+                    early_duration = (shift_end_datetime - record.check_out_final).total_seconds() / 60.0 / 60.0
+            record.late_check_in = max(late_duration, 0)
+            record.early_check_out = max(early_duration, 0)
 
     @api.depends('employee_id', 'date')
     def _compute_hr_attendance(self):
@@ -162,20 +194,83 @@ class HrAttendanceMiddleware(models.Model):
         return Converter.date_time_to_gmt_naive(date_obj, time_obj)
 
     def action_fix_work_entries(self):
+        work_entry_type_attendance = self.env.ref("hr_work_entry.work_entry_type_attendance")
+        self.regenerate_work_entries()
         for record in self:
             min_date_start = None
             max_date_stop = None
             start_work_entry = None
             end_work_entry = None
+            leave_duration = 0
             hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
+            hours_per_day = record.best_work_time_id.calendar_id.hours_per_day
+            # Analyze existing work entries
             for work_entry in record.work_entry_ids:
+                if work_entry.work_entry_type_id != work_entry_type_attendance:
+                    leave_duration += work_entry.duration
                 if not min_date_start or work_entry.date_start < min_date_start:
                     min_date_start = work_entry.date_start
                     start_work_entry = work_entry
                 if not max_date_stop or work_entry.date_stop > max_date_stop:
                     max_date_stop = work_entry.date_stop
                     end_work_entry = work_entry
+            # Adjust attendance work entries
             if start_work_entry:
-                start_work_entry.date_start = record._convert_to_gmt_naive(record.date, hour_from_time)
+                work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time)
+                start_work_entry.date_start = work_entry_start # Set anyway to shift start
+                if start_work_entry.work_entry_type_id != work_entry_type_attendance:
+                    start_work_entry.date_stop = work_entry_start + timedelta(hours=leave_duration)    
+                else:
+                    start_work_entry.date_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
             if end_work_entry:
-                end_work_entry.date_stop = record._convert_to_gmt_naive(record.date, hour_to_time)
+                work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time)
+                end_work_entry.date_stop = work_entry_stop # Set anyway to shift end
+                if end_work_entry.work_entry_type_id != work_entry_type_attendance:
+                    end_work_entry.date_start = work_entry_stop - timedelta(hours=leave_duration)    
+                else:
+                    end_work_entry.date_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
+
+    def regenerate_work_entries(self):
+        regenerate_wizard = self.env['hr.work.entry.regeneration.wizard'].sudo()
+        for record in self:
+            wizard = regenerate_wizard.create({
+                'employee_ids': [Command.set([record.employee_id.id])],
+                'date_from': record.date,
+                'date_to': record.date,
+            })
+            wizard.regenerate_work_entries()
+
+    def action_adjust_checkings(self):
+        allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        allowed_early_leaving_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_early_leaving_minutes', default=15)
+        check_in_out_tolerance_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_zk_api_attendance.check_in_out_tolerance_minutes', default=15)
+        
+        for record in self:
+            check_in = record.check_in_computed
+            check_out = record.check_out_computed
+            if abs(record.check_in_computed - record.check_out_computed) < timedelta(minutes=check_in_out_tolerance_minutes):
+                hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
+                if is_check_in_close_to_start: # Check-in is correct
+                    check_out = record._convert_to_gmt_naive(record.date, hour_to_time) - timedelta(minutes=allowed_early_leaving_minutes + 1) # Set check-out to shift end - (allowed early leaving + 1 minute) to apply penalty
+                else: # Check-out is correct
+                    check_in = record._convert_to_gmt_naive(record.date, hour_from_time) + timedelta(minutes=allowed_late_minutes + 1) # Set check-in to shift start + (allowed late + 1 minute) to apply penalty
+            record.write({
+                'check_in_final': check_in,
+                'check_out_final': check_out,
+            })
+
+    def action_adjust_or_create_hr_attendance(self):
+        for record in self:
+            vals = {
+                'employee_id': record.employee_id.id,
+                'check_in': record.check_in_final,
+                'check_out': record.check_out_final,
+                'late_check_in': record.late_check_in,
+                'early_check_out': record.early_check_out,
+            }
+            if record.hr_attendance_id:
+                vals.pop('employee_id')  # Employee cannot be changed on write
+                record.hr_attendance_id.write(vals)
+            else:
+                new_attendance = self.env['hr.attendance'].create(vals) 
+            record.hr_attendance_id._compute_overtime_hours()
