@@ -17,7 +17,7 @@
             <form>
                 <header>
                     <button type="object" name="action_fix_work_entries" string="Fix Work Entries"/>
-                    <button type="object" name="action_adjust_checkings" string="Adjust Checkings"/>
+                    <!-- <button type="object" name="action_adjust_checkings" string="Adjust Checkings"/> -->
                     <button type="object" name="action_adjust_or_create_hr_attendance" string="Adjust or Create Attendance"/>
                 </header>
                 <sheet>

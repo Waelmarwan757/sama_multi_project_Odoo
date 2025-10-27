@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime, timedelta
 import pytz
-from odoo import models, fields, api, Command
+from odoo import models, fields, api, Command, _
+from odoo.exceptions import ValidationError
 from odoo.addons.hr_attendance_deviation.tools import Converter
 
 _logger = logging.getLogger(__name__)
@@ -21,12 +22,14 @@ class HrAttendanceMiddleware(models.Model):
     zk_attendance_ids = fields.Many2many('zk.attendance', string='ZK Attendances', compute='_compute_zk_attendances')
     check_in_computed = fields.Datetime(string='In', compute='_compute_checkings')
     check_out_computed = fields.Datetime(string='Out', compute='_compute_checkings')
+    in_mode = fields.Selection([('manual', 'Manual'), ('systray', 'Systray'), ('technical', 'Technical')], compute='_compute_checkings', string='In Mode')
+    out_mode = fields.Selection([('manual', 'Manual'), ('systray', 'Systray'), ('technical', 'Technical')], compute='_compute_checkings', string='Out Mode')
     best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Best Work Time', compute='_compute_best_work_time')
     is_check_in_close_to_start = fields.Boolean(string='Check-In Close to Start', compute='_compute_is_check_in_close_to_start', help='Indicates if the check-in time is closer to the start of the shift than to the end.')
 
     # Final to adjust fields
-    check_in_final = fields.Datetime(string='In', readonly=True)
-    check_out_final = fields.Datetime(string='Out', readonly=True)
+    check_in_final = fields.Datetime(string='In', compute='_compute_checking_adjustments', readonly=True)
+    check_out_final = fields.Datetime(string='Out', compute='_compute_checking_adjustments', readonly=True)
 
     # Final computed fields
     late_check_in = fields.Float(
@@ -41,6 +44,17 @@ class HrAttendanceMiddleware(models.Model):
         store=True,
         help='Time in hours that the employee checked out early.',
     )
+
+    @api.constrains('employee_id', 'date')
+    def _check_unique_attendance(self):
+        for record in self:
+            existing = self.search_count([
+                ('employee_id', '=', record.employee_id.id),
+                ('date', '=', record.date),
+                ('id', '!=', record.id),
+            ])
+            if existing:
+                raise ValidationError(_("An attendance middleware record for employee %s on date %s already exists.") % (record.employee_id.name, record.date))
 
     @api.depends('check_in_final', 'check_out_final', 'best_work_time_id', 'date')
     def _compute_late_early_times(self):
@@ -119,16 +133,27 @@ class HrAttendanceMiddleware(models.Model):
             check_in = False
             check_out = False
             punch_datetimes = []
+            systray_datetimes = []
             if record.employee_id and record.zk_attendance_ids:
                 punch_datetimes.extend(record._get_zk_api_datetimes())
             if record.hr_attendance_id:
-                if record.hr_attendance_id.check_in:
+                if record.hr_attendance_id.check_in and record.hr_attendance_id.in_mode == 'systray':
                     punch_datetimes.append(record.hr_attendance_id.check_in)
-                if record.hr_attendance_id.check_out:
+                    systray_datetimes.append(record.hr_attendance_id.check_in)
+                if record.hr_attendance_id.check_out and record.hr_attendance_id.out_mode == 'systray':
                     punch_datetimes.append(record.hr_attendance_id.check_out)
+                    systray_datetimes.append(record.hr_attendance_id.check_out)
             if punch_datetimes:
                 check_in = min(punch_datetimes)
                 check_out = max(punch_datetimes)
+                if check_in in systray_datetimes:
+                    record.in_mode = 'systray'
+                else:
+                    record.in_mode = 'technical'
+                if check_out in systray_datetimes:
+                    record.out_mode = 'systray'
+                else:
+                    record.out_mode = 'technical'
             record.check_in_computed = check_in
             record.check_out_computed = check_out
 
@@ -197,6 +222,8 @@ class HrAttendanceMiddleware(models.Model):
         work_entry_type_attendance = self.env.ref("hr_work_entry.work_entry_type_attendance")
         self.regenerate_work_entries()
         for record in self:
+            if not record.best_work_time_id:
+                continue
             min_date_start = None
             max_date_stop = None
             start_work_entry = None
@@ -238,9 +265,13 @@ class HrAttendanceMiddleware(models.Model):
                 'date_from': record.date,
                 'date_to': record.date,
             })
-            wizard.regenerate_work_entries()
+            wizard.with_context(work_entry_skip_validation=True).regenerate_work_entries()
 
     def action_adjust_checkings(self):
+        self._compute_checking_adjustments()
+
+    @api.depends('check_in_computed', 'check_out_computed', 'best_work_time_id', 'is_check_in_close_to_start')
+    def _compute_checking_adjustments(self):
         allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
         allowed_early_leaving_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_early_leaving_minutes', default=15)
         check_in_out_tolerance_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_zk_api_attendance.check_in_out_tolerance_minutes', default=15)
@@ -248,25 +279,31 @@ class HrAttendanceMiddleware(models.Model):
         for record in self:
             check_in = record.check_in_computed
             check_out = record.check_out_computed
-            if abs(record.check_in_computed - record.check_out_computed) < timedelta(minutes=check_in_out_tolerance_minutes):
+            if check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
                 hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
-                if is_check_in_close_to_start: # Check-in is correct
+                if record.is_check_in_close_to_start: # Check-in is correct
                     check_out = record._convert_to_gmt_naive(record.date, hour_to_time) - timedelta(minutes=allowed_early_leaving_minutes + 1) # Set check-out to shift end - (allowed early leaving + 1 minute) to apply penalty
                 else: # Check-out is correct
                     check_in = record._convert_to_gmt_naive(record.date, hour_from_time) + timedelta(minutes=allowed_late_minutes + 1) # Set check-in to shift start + (allowed late + 1 minute) to apply penalty
-            record.write({
+            record.update({
                 'check_in_final': check_in,
                 'check_out_final': check_out,
             })
 
     def action_adjust_or_create_hr_attendance(self):
         for record in self:
+            in_mode = record.in_mode if record.check_in_computed == record.check_in_final else 'technical'
+            out_mode = record.out_mode if record.check_out_computed == record.check_out_final else 'technical'
             vals = {
                 'employee_id': record.employee_id.id,
                 'check_in': record.check_in_final,
                 'check_out': record.check_out_final,
                 'late_check_in': record.late_check_in,
                 'early_check_out': record.early_check_out,
+                'in_mode': in_mode,
+                'out_mode': out_mode,
+                'zk_attendance_ids': [Command.set(record.zk_attendance_ids.ids)],
+                'middleware_id': record.id,
             }
             if record.hr_attendance_id:
                 vals.pop('employee_id')  # Employee cannot be changed on write

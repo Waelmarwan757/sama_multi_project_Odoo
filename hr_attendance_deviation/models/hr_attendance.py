@@ -9,6 +9,11 @@ _logger = logging.getLogger(__name__)
 class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
+    middleware_id = fields.Many2one(
+        'hr.attendance.middleware',
+        string='Middleware Record',
+        help='Link to the middleware record associated with this attendance record.',
+    )
     # work_entry_id = fields.Many2one(
         # 'hr.work.entry',
         # compute='_compute_work_entry_id',
