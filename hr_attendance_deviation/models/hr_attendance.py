@@ -13,6 +13,7 @@ class HrAttendance(models.Model):
         'hr.attendance.middleware',
         string='Middleware Record',
         help='Link to the middleware record associated with this attendance record.',
+        readonly=True,
     )
     # work_entry_id = fields.Many2one(
         # 'hr.work.entry',

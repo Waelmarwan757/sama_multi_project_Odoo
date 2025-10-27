@@ -17,9 +17,11 @@
                     <field name="early_check_out" widget="float_time" invisible="not early_check_out"/>
                 </field>
                 <sheet position="inside">
-                    <separator string="Attendance Middleware" name="middleware_separator" invisible="not middleware_id" groups="hr_attendance.group_hr_attendance_officer"/>
-                    <field name="middleware_id" groups="hr_attendance.group_hr_attendance_officer" invisible="not middleware_id"/>
+                    <group string="Middleware Information">
+                        <field name="middleware_id" groups="hr_attendance.group_hr_attendance_officer" invisible="not middleware_id"/>
+                    </group>
                 </sheet>
+            </field>
         </record>
     </data>
 </odoo>

@@ -311,3 +311,11 @@ class HrAttendanceMiddleware(models.Model):
             else:
                 new_attendance = self.env['hr.attendance'].create(vals) 
             record.hr_attendance_id._compute_overtime_hours()
+
+    @api.depends('employee_id', 'date')
+    def _compute_display_name(self):
+        for record in self:
+            if record.employee_id and record.date:
+                record.display_name = f"{record.employee_id.name} - {record.date.strftime('%Y-%m-%d')}"
+            else:
+                record.display_name = "Undefined"
