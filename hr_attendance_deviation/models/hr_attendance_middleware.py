@@ -132,6 +132,8 @@ class HrAttendanceMiddleware(models.Model):
         for record in self:
             check_in = False
             check_out = False
+            in_mode = 'technical'
+            out_mode = 'technical'
             punch_datetimes = []
             systray_datetimes = []
             if record.employee_id and record.zk_attendance_ids:
@@ -147,13 +149,15 @@ class HrAttendanceMiddleware(models.Model):
                 check_in = min(punch_datetimes)
                 check_out = max(punch_datetimes)
                 if check_in in systray_datetimes:
-                    record.in_mode = 'systray'
+                    in_mode = 'systray'
                 else:
-                    record.in_mode = 'technical'
+                    in_mode = 'technical'
                 if check_out in systray_datetimes:
-                    record.out_mode = 'systray'
+                    out_mode = 'systray'
                 else:
-                    record.out_mode = 'technical'
+                    out_mode = 'technical'
+            record.in_mode = in_mode
+            record.out_mode = out_mode
             record.check_in_computed = check_in
             record.check_out_computed = check_out
 
