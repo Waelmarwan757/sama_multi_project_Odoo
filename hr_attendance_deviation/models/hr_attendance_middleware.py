@@ -247,19 +247,17 @@ class HrAttendanceMiddleware(models.Model):
                     end_work_entry = work_entry
             # Adjust attendance work entries
             if start_work_entry:
-                work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time)
-                start_work_entry.date_start = work_entry_start # Set anyway to shift start
+                work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time) # Set anyway to shift start
+                work_entry_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
                 if start_work_entry.work_entry_type_id != work_entry_type_attendance:
-                    start_work_entry.date_stop = work_entry_start + timedelta(hours=leave_duration)    
-                else:
-                    start_work_entry.date_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
+                    work_entry_stop = work_entry_start + timedelta(hours=leave_duration)    
+                start_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
             if end_work_entry:
-                work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time)
-                end_work_entry.date_stop = work_entry_stop # Set anyway to shift end
+                work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time) # Set anyway to shift end
+                work_entry_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
                 if end_work_entry.work_entry_type_id != work_entry_type_attendance:
-                    end_work_entry.date_start = work_entry_stop - timedelta(hours=leave_duration)    
-                else:
-                    end_work_entry.date_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
+                    work_entry_start = work_entry_stop - timedelta(hours=leave_duration)    
+                end_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
 
     def regenerate_work_entries(self):
         regenerate_wizard = self.env['hr.work.entry.regeneration.wizard'].sudo()
