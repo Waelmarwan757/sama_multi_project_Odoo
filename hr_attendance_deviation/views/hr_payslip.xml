@@ -11,17 +11,17 @@
                             <group>
                                 <separator string="Early Leaving"/>
                                     <field name="early_leaving_days"/>
-                                    <field name="early_leaving_hours"/>
+                                    <field name="early_leaving_hours" widget="float_time"/>
                                 <separator string="Late Leaving"/>
                                     <field name="late_days"/>
-                                    <field name="late_hours"/>
+                                    <field name="late_hours" widget="float_time"/>
                                 <separator string="Permissions"/>
                                     <field name="late_permission_count"/>
-                                    <field name="late_permission_hours"/>
+                                    <field name="late_permission_hours" widget="float_time"/>
                             </group>
                             <group>
                                 <separator string="Overtime"/>
-                                    <field name="overtime_hours"/>
+                                    <field name="overtime_hours" widget="float_time"/>
                                 <separator string="Attendance &amp; Weekends"/>
                                     <field name="days_attended"/>
                                     <field name="weekend_days"/>
