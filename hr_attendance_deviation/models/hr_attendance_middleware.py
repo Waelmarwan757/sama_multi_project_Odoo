@@ -323,12 +323,16 @@ class HrAttendanceMiddleware(models.Model):
         for record in self:
             check_in = record.check_in_computed
             check_out = record.check_out_computed
-            if check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
-                hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
-                if record.is_check_in_close_to_start: # Check-in is correct
-                    check_out = record._convert_to_gmt_naive(record.date, hour_to_time) - timedelta(minutes=allowed_early_leaving_minutes + 1) # Set check-out to shift end - (allowed early leaving + 1 minute) to apply penalty
-                else: # Check-out is correct
-                    check_in = record._convert_to_gmt_naive(record.date, hour_from_time) + timedelta(minutes=allowed_late_minutes + 1) # Set check-in to shift start + (allowed late + 1 minute) to apply penalty
+            try:
+                if check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
+                    hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
+                    if record.is_check_in_close_to_start: # Check-in is correct
+                        check_out = record._convert_to_gmt_naive(record.date, hour_to_time) - timedelta(minutes=allowed_early_leaving_minutes + 1) # Set check-out to shift end - (allowed early leaving + 1 minute) to apply penalty
+                    else: # Check-out is correct
+                        check_in = record._convert_to_gmt_naive(record.date, hour_from_time) + timedelta(minutes=allowed_late_minutes + 1) # Set check-in to shift start + (allowed late + 1 minute) to apply penalty
+            except Exception as e:
+                record.message_post(body=_("Failed to adjust check-in/check-out times: %s" % str(e)))
+                record.state = 'attendance_adjustment_error'
             record.update({
                 'check_in_final': check_in,
                 'check_out_final': check_out,
