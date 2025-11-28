@@ -247,8 +247,9 @@ class HrAttendanceMiddleware(models.Model):
 
     def action_fix_work_entries(self, bulk=False):
         work_entry_type_attendance = self.env.ref("hr_work_entry.work_entry_type_attendance")
-        self.regenerate_work_entries()
-        for record in self:
+        records = self.filtered(lambda r: 'error' not in r.state)
+        records.regenerate_work_entries()
+        for record in records:
             best_work_time = record.force_best_work_time_id or record.best_work_time_id
             if bulk:
                 best_work_time = record.best_work_time_id
@@ -334,7 +335,7 @@ class HrAttendanceMiddleware(models.Model):
             })
 
     def action_adjust_or_create_hr_attendance(self, bulk=False):
-        records = self
+        records = self.filtered(lambda r: 'error' not in r.state)
         for record in records:
             force_check_in, force_check_out, force_late_check_in, force_early_check_out = None, None, None, None
             if not bulk:
