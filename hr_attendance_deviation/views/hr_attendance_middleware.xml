@@ -64,7 +64,7 @@
                                     <field name="work_entry_type_id"/>
                                     <field name="date_start"/>
                                     <field name="date_stop"/>
-                                    <field name="duration" string="Type" optional="hide"/>
+                                    <field name="duration" widget="float_time" optional="hide"/>
                                 </list>
                             </field>
                         </page>
@@ -82,18 +82,44 @@
                         </page>
                         <page string="Checkings">
                             <group string="Original Checkings">
-                                <field name="check_in_computed"/>
-                                <field name="check_out_computed"/>
+                                <group>
+                                    <field name="check_in_computed"/>
+                                </group>
+                                <group>
+                                    <field name="check_out_computed"/>
+                                </group>
                             </group>
                             <group string="Adjusted Checkings">
-                                <field name="check_in_final"/>
-                                <field name="late_check_in" widget="float_time" invisible="not late_check_in"/>
-                                <field name="check_out_final"/>
-                                <field name="early_check_out" widget="float_time" invisible="not early_check_out"/>
+                                <group>
+                                    <field name="check_in_final"/>
+                                    <field name="late_check_in" widget="float_time" invisible="not late_check_in"/>
+                                </group>
+                                <group>
+                                    <field name="check_out_final"/>
+                                    <field name="early_check_out" widget="float_time" invisible="not early_check_out"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Force Adjustments" groups="hr_attendance_deviation.group_hr_attendance_middleware_admin">
+                            <group>
+                                <group>
+                                    <field name="force_best_work_time_id"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="force_check_in"/>
+                                    <field name="force_late_check_in"/>
+                                </group>
+                                <group>
+                                    <field name="force_check_out"/>
+                                    <field name="force_early_check_out"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>
                 </sheet>
+                <Chatter/>
             </form>
         </field>
     </record>

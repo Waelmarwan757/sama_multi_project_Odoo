@@ -9,7 +9,18 @@ _logger = logging.getLogger(__name__)
 
 class HrAttendanceMiddleware(models.Model):
     _name = 'hr.attendance.middleware'
+    _inherit = ['mail.thread']
     _description = 'HR Attendance Middleware'
+
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('work_entries_error', 'W.E. Error'),
+        ('work_entries_valid', 'W.E. Fixed'),
+        ('attendance_creation_error', 'A.C. Error'),
+        ('attendance_created', 'A. Created'),
+        ('attendance_adjustment_error', 'A.A. Error'),
+        ('attendance_adjusted', 'A. Adjusted'),
+    ], string='Status', default='draft', readonly=True, tracking=True, help='W.E.: Work Entries, A.C.: Attendance Creation, A.A.: Attendance Adjustment')
 
     # General Information fields
     employee_id = fields.Many2one('hr.employee', string='Employee')
@@ -44,6 +55,18 @@ class HrAttendanceMiddleware(models.Model):
         store=True,
         help='Time in hours that the employee checked out early.',
     )
+
+    # Force fields
+    force_best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Force Best Work Time', domain="[('id', 'in', working_time_ids)]", help='Manually set best work time to override computed value.', tracking=True)
+    force_check_in = fields.Float(string='Force In', help='Manually set check-in time to override computed value.', tracking=True)
+    force_check_out = fields.Float(string='Force Out', help='Manually set check-out time to override computed value.', tracking=True)
+    force_late_check_in = fields.Float(string='Force Late In', help='Manually set late check-in hours to override computed value.', tracking=True)
+    force_early_check_out = fields.Float(string='Force Early Out', help='Manually set early check-out hours to override computed value.', tracking=True)
+
+    @api.ondelete(at_uninstall=True)
+    def _ondelete_unsettle_zk_attendance(self):
+        for record in self:
+            record.zk_attendance_ids.write({'is_settled': False})
 
     @api.constrains('employee_id', 'date')
     def _check_unique_attendance(self):
@@ -222,42 +245,52 @@ class HrAttendanceMiddleware(models.Model):
     def _convert_to_gmt_naive(self, date_obj, time_obj):
         return Converter.date_time_to_gmt_naive(date_obj, time_obj)
 
-    def action_fix_work_entries(self):
+    def action_fix_work_entries(self, bulk=False):
         work_entry_type_attendance = self.env.ref("hr_work_entry.work_entry_type_attendance")
         self.regenerate_work_entries()
         for record in self:
-            if not record.best_work_time_id:
+            best_work_time = record.force_best_work_time_id or record.best_work_time_id
+            if bulk:
+                best_work_time = record.best_work_time_id
+            if not best_work_time:
+                record.message_post(body=_("No suitable working time found for the attendance date."))
+                record.state = 'work_entries_error'
                 continue
             min_date_start = None
             max_date_stop = None
             start_work_entry = None
             end_work_entry = None
             leave_duration = 0
-            hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
-            hours_per_day = record.best_work_time_id.calendar_id.hours_per_day
-            # Analyze existing work entries
-            for work_entry in record.work_entry_ids:
-                if work_entry.work_entry_type_id != work_entry_type_attendance:
-                    leave_duration += work_entry.duration
-                if not min_date_start or work_entry.date_start < min_date_start:
-                    min_date_start = work_entry.date_start
-                    start_work_entry = work_entry
-                if not max_date_stop or work_entry.date_stop > max_date_stop:
-                    max_date_stop = work_entry.date_stop
-                    end_work_entry = work_entry
-            # Adjust attendance work entries
-            if start_work_entry:
-                work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time) # Set anyway to shift start
-                work_entry_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
-                if start_work_entry.work_entry_type_id != work_entry_type_attendance:
-                    work_entry_stop = work_entry_start + timedelta(hours=leave_duration)    
-                start_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
-            if end_work_entry:
-                work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time) # Set anyway to shift end
-                work_entry_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
-                if end_work_entry.work_entry_type_id != work_entry_type_attendance:
-                    work_entry_start = work_entry_stop - timedelta(hours=leave_duration)    
-                end_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
+            try:
+                hour_from_time, hour_to_time = best_work_time._get_time_objects()
+                hours_per_day = best_work_time.calendar_id.hours_per_day
+                # Analyze existing work entries
+                for work_entry in record.work_entry_ids:
+                    if work_entry.work_entry_type_id != work_entry_type_attendance:
+                        leave_duration += work_entry.duration
+                    if not min_date_start or work_entry.date_start < min_date_start:
+                        min_date_start = work_entry.date_start
+                        start_work_entry = work_entry
+                    if not max_date_stop or work_entry.date_stop > max_date_stop:
+                        max_date_stop = work_entry.date_stop
+                        end_work_entry = work_entry
+                # Adjust attendance work entries
+                if start_work_entry:
+                    work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time) # Set anyway to shift start
+                    work_entry_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
+                    if start_work_entry.work_entry_type_id != work_entry_type_attendance:
+                        work_entry_stop = work_entry_start + timedelta(hours=leave_duration)    
+                    start_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
+                if end_work_entry:
+                    work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time) # Set anyway to shift end
+                    work_entry_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
+                    if end_work_entry.work_entry_type_id != work_entry_type_attendance:
+                        work_entry_start = work_entry_stop - timedelta(hours=leave_duration)    
+                    end_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
+                record.state = 'work_entries_valid'
+            except Exception as e:
+                record.message_post(body=_("Failed to fix work entries: %s" % str(e)))
+                record.state = 'work_entries_error'
 
     def regenerate_work_entries(self):
         regenerate_wizard = self.env['hr.work.entry.regeneration.wizard'].sudo()
@@ -292,27 +325,74 @@ class HrAttendanceMiddleware(models.Model):
                 'check_out_final': check_out,
             })
 
-    def action_adjust_or_create_hr_attendance(self):
-        for record in self:
-            in_mode = record.in_mode if record.check_in_computed == record.check_in_final else 'technical'
-            out_mode = record.out_mode if record.check_out_computed == record.check_out_final else 'technical'
+    def action_adjust_or_create_hr_attendance(self, bulk=False):
+        records = self
+        for record in records:
+            force_check_in, force_check_out, force_late_check_in, force_early_check_out = None, None, None, None
+            if not bulk:
+                force_check_in, force_check_out, force_late_check_in, force_early_check_out = record._get_forced_values()
+            check_in = force_check_in or record.check_in_final
+            check_out = force_check_out or record.check_out_final
+            in_mode = record.in_mode if record.check_in_computed == check_in else 'technical'
+            out_mode = record.out_mode if record.check_out_computed == check_out else 'technical'
             vals = {
                 'employee_id': record.employee_id.id,
-                'check_in': record.check_in_final,
-                'check_out': record.check_out_final,
-                'late_check_in': record.late_check_in,
-                'early_check_out': record.early_check_out,
+                'check_in': check_in,
+                'check_out': check_out,
+                'late_check_in': force_late_check_in or record.late_check_in,
+                'early_check_out': force_early_check_out or record.early_check_out,
                 'in_mode': in_mode,
                 'out_mode': out_mode,
                 'zk_attendance_ids': [Command.set(record.zk_attendance_ids.ids)],
                 'middleware_id': record.id,
             }
+            compute_overtime = False
             if record.hr_attendance_id:
                 vals.pop('employee_id')  # Employee cannot be changed on write
-                record.hr_attendance_id.write(vals)
+                try:
+                    record.hr_attendance_id.write(vals)
+                    record.state = 'attendance_adjusted'
+                    record.message_post(body=_("HR Attendance adjusted successfully."))
+                    compute_overtime = True
+                except Exception as e:
+                    record.message_post(body=_("Failed to adjust HR Attendance: %s" % str(e)))
+                    record.state = 'attendance_adjustment_error'
             else:
-                new_attendance = self.env['hr.attendance'].create(vals) 
-            record.hr_attendance_id._compute_overtime_hours()
+                try:
+                    new_attendance = self.env['hr.attendance'].create(vals)
+                    record.message_post(body=_("HR Attendance created successfully."))
+                    record.state = 'attendance_created'
+                    compute_overtime = True
+                except Exception as e:
+                    record.message_post(body=_("Failed to create HR Attendance: %s" % str(e)))
+                    record.state = 'attendance_creation_error'
+            if compute_overtime:
+                record.hr_attendance_id._compute_overtime_hours()
+
+    def _get_forced_values(self):
+        self.ensure_one()
+        force_check_in, force_check_out, force_late_check_in, force_early_check_out = None, None, None, None
+        if self.force_check_in > 0:
+            force_check_in = self.force_check_in
+        if self.force_check_out > 0:
+            force_check_out = self.force_check_out
+        if self.force_late_check_in > 0:
+            force_late_check_in = self.force_late_check_in
+        if self.force_early_check_out > 0:
+            force_early_check_out = self.force_early_check_out
+        if any([
+            self.force_check_in > 0,
+            self.force_check_out > 0,
+            self.force_late_check_in > 0,
+            self.force_early_check_out > 0,
+        ]):
+            self.message_post(body=_("Attendance record has been forced adjusted with values: %s") % {
+                'force_check_in': force_check_in,
+                'force_check_out': force_check_out,
+                'force_late_check_in': force_late_check_in,
+                'force_early_check_out': force_early_check_out,
+            })
+        return force_check_in, force_check_out, force_late_check_in, force_early_check_out
 
     @api.depends('employee_id', 'date')
     def _compute_display_name(self):

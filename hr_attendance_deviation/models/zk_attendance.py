@@ -43,8 +43,8 @@ class ZkAttendance(models.Model):
         created_records = self.env['hr.attendance.middleware'].create(formatted_data)
         existing_middleware_ids.extend(created_records.ids)
         existing_middleware_records = self.env['hr.attendance.middleware'].browse(existing_middleware_ids)
-        existing_middleware_records.action_fix_work_entries()
-        existing_middleware_records.action_adjust_or_create_hr_attendance()
+        existing_middleware_records.action_fix_work_entries(bulk=True)
+        existing_middleware_records.action_adjust_or_create_hr_attendance(bulk=True)
         self.write({'is_settled': True})
 
     @api.model
