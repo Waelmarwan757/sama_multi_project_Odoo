@@ -60,9 +60,9 @@ class ZkAttendance(models.Model):
 
         return vals_list
 
-    def cron_auto_link_hr_attendance(self, limit=10):
+    def cron_auto_link_hr_attendance(self, limit=30, start_date='2025-10-24'):
         _logger.info("Starting cron job to link ZK attendance records to HR attendance middleware.")
-        records = self.search([('is_settled', '=', False), ('att_date', '>=', '2025-10-24')])
+        records = self.search([('is_settled', '=', False), ('att_date', '>=', start_date)])
         _logger.info(f"Found {len(records)} ZK attendance records to process.")
         if records:
             records.action_link_hr_attendance(limit=limit)
