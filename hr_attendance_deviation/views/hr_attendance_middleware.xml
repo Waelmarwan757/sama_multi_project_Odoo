@@ -19,6 +19,7 @@
                     <button type="object" name="action_fix_work_entries" string="Fix Work Entries"/>
                     <!-- <button type="object" name="action_adjust_checkings" string="Adjust Checkings"/> -->
                     <button type="object" name="action_adjust_or_create_hr_attendance" string="Adjust or Create Attendance"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,work_entries_valid"/>
                 </header>
                 <sheet>
                     <group>
@@ -121,6 +122,18 @@
                 </sheet>
                 <Chatter/>
             </form>
+        </field>
+    </record>
+
+    <record id="view_hr_attendance_middleware_search" model="ir.ui.view">
+        <field name="name">hr.attendance.middleware.search</field>
+        <field name="model">hr.attendance.middleware</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <filter name="group_by_state" string="Group by State" context="{'group_by': 'state'}"/>
+                <filter name="group_by_date" string="Group by Date" context="{'group_by': 'date'}"/>
+            </search>
         </field>
     </record>
 
