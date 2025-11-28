@@ -336,7 +336,9 @@ class HrAttendanceMiddleware(models.Model):
 
     def action_adjust_or_create_hr_attendance(self, bulk=False):
         records = self.filtered(lambda r: 'error' not in r.state)
+        zk_attendance_ids = []
         for record in records:
+            zk_attendance_ids.extend(record.zk_attendance_ids.ids)
             force_check_in, force_check_out, force_late_check_in, force_early_check_out = None, None, None, None
             if not bulk:
                 force_check_in, force_check_out, force_late_check_in, force_early_check_out = record._get_forced_values()
@@ -377,6 +379,7 @@ class HrAttendanceMiddleware(models.Model):
                     record.state = 'attendance_creation_error'
             if compute_overtime:
                 record.hr_attendance_id._compute_overtime_hours()
+        return zk_attendance_ids
 
     def _get_forced_values(self):
         self.ensure_one()
