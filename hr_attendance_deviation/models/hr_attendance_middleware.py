@@ -123,6 +123,7 @@ class HrAttendanceMiddleware(models.Model):
                         time_ids.extend([Command.link(at.id) for at in working_times])
                 record.working_time_ids = time_ids
             else:
+                record.message_post(body=_("No working times found for the attendance date."))
                 record.working_time_ids = False
 
     @api.depends('employee_id', 'date')
@@ -324,7 +325,7 @@ class HrAttendanceMiddleware(models.Model):
             check_in = record.check_in_computed
             check_out = record.check_out_computed
             try:
-                if check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
+                if record.best_work_time_id and check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
                     hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
                     if record.is_check_in_close_to_start: # Check-in is correct
                         check_out = record._convert_to_gmt_naive(record.date, hour_to_time) - timedelta(minutes=allowed_early_leaving_minutes + 1) # Set check-out to shift end - (allowed early leaving + 1 minute) to apply penalty
