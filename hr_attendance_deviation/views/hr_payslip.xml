@@ -15,7 +15,9 @@
                                 <separator string="Late Leaving"/>
                                     <field name="late_days"/>
                                     <field name="late_hours"/>
+                                <separator string="Permissions"/>
                                     <field name="late_permission_count"/>
+                                    <field name="late_permission_hours"/>
                             </group>
                             <group>
                                 <separator string="Overtime"/>

@@ -19,9 +19,14 @@ class HrPayslip(models.Model):
         help='Total hours of late attendance for the payslip period.',
     )
     late_permission_count = fields.Integer(
-        string='Late Permissions',
-        compute='_compute_late_permission_count',
+        string='Late/Early Leaving Permissions',
+        compute='_compute_late_permission',
         help='Number of late permissions granted during the payslip period.',
+    )
+    late_permission_hours = fields.Float(
+        string='Late/Early Leaving Permission Hours',
+        compute='_compute_late_permission',
+        help='Total hours of late permissions granted during the payslip period.',
     )
     early_leaving_days = fields.Float(
         string='Early Leaving Days',
@@ -61,17 +66,18 @@ class HrPayslip(models.Model):
             ])
             payslip.overtime_hours = sum(overtime_attendances.mapped('validated_overtime_hours'))
 
-    def _compute_late_permission_count(self):
+    def _compute_late_permission(self):
         for payslip in self:
             from_date_midnight = datetime.combine(payslip.date_from, time.min)
             end_of_to_date = datetime.combine(payslip.date_to, time.max)
-            late_permissions = self.env['hr.work.entry'].search_count([
+            late_permissions = self.env['hr.work.entry'].search([
                 ('employee_id', '=', payslip.employee_id.id),
                 ('date_start', '>=', from_date_midnight),
                 ('date_stop', '<=', end_of_to_date),
                 ('work_entry_type_id.code', '=', 'LATE')
             ])
-            payslip.late_permission_count = late_permissions
+            payslip.late_permission_count = len(late_permissions)
+            payslip.late_permission_hours = sum(late_permissions.mapped('duration'))
 
     def _compute_weekend_days(self):
         attendance_type = self.env.ref('hr_work_entry.work_entry_type_attendance')
