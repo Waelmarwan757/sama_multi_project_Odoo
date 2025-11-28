@@ -14,6 +14,7 @@ class HrAttendanceMiddleware(models.Model):
 
     state = fields.Selection([
         ('draft', 'Draft'),
+        ('init_error', 'Init Error'),
         ('work_entries_error', 'W.E. Error'),
         ('work_entries_valid', 'W.E. Fixed'),
         ('attendance_creation_error', 'A.C. Error'),
@@ -122,8 +123,11 @@ class HrAttendanceMiddleware(models.Model):
                         working_times = rc.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek and at.work_entry_type_id == attendance_type)
                         time_ids.extend([Command.link(at.id) for at in working_times])
                 record.working_time_ids = time_ids
+                if not time_ids:
+                    if 'error' not in record.state:
+                        record.message_post(body=_("No working times found for the attendance date."))
+                        record.state = 'init_error'
             else:
-                record.message_post(body=_("No working times found for the attendance date."))
                 record.working_time_ids = False
 
     @api.depends('employee_id', 'date')
