@@ -131,8 +131,11 @@
         <field name="arch" type="xml">
             <search>
                 <field name="employee_id"/>
-                <filter name="group_by_state" string="Group by State" context="{'group_by': 'state'}"/>
-                <filter name="group_by_date" string="Group by Date" context="{'group_by': 'date'}"/>
+                <filter name="filter_by_this_month" string="This Month" domain="[('date', '>=', (context_today().replace(day=1)).strftime('%%Y-%%m-%%d')), ('date', '<=', (context_today().replace(day=1) + relativedelta(months=1, days=-1)).strftime('%%Y-%%m-%%d'))]"/>
+                <filter name="filter_by_today" string="Today" domain="[('date', '=', context_today().strftime('%%Y-%%m-%%d'))]"/>
+                <filter name="group_by_employee" string="Group by Employee" domain="[]" context="{'group_by': 'employee_id'}"/>
+                <filter name="group_by_state" string="Group by State"  domain="[]" context="{'group_by': 'state'}"/>
+                <filter name="group_by_date" string="Group by Date" domain="[]" context="{'group_by': 'date:day'}"/>
             </search>
         </field>
     </record>
@@ -141,6 +144,7 @@
         <field name="name">Attendance Middleware</field>
         <field name="res_model">hr.attendance.middleware</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_by_this_month': 1, 'search_default_group_by_state': 1, 'search_default_group_by_date': 1}</field>
     </record>
 
     <menuitem id="menu_hr_attendance_middleware_root"
