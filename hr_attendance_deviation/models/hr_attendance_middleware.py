@@ -279,15 +279,23 @@ class HrAttendanceMiddleware(models.Model):
                     work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time) # Set anyway to shift start
                     work_entry_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
                     if start_work_entry.work_entry_type_id != work_entry_type_attendance:
-                        work_entry_stop = work_entry_start + timedelta(hours=leave_duration)    
-                    start_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
+                        work_entry_stop = work_entry_start + timedelta(hours=leave_duration)
+                    if work_entry_stop > work_entry_start:
+                        start_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
+                        record.state = 'work_entries_valid'
+                    else:
+                        record.message_post(body=_("Invalid work entry times after adjustment start: %s - end: %s." % (work_entry_start, work_entry_stop)))
+                        record.state = 'work_entries_error'
                 if end_work_entry:
                     work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time) # Set anyway to shift end
                     work_entry_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
                     if end_work_entry.work_entry_type_id != work_entry_type_attendance:
-                        work_entry_start = work_entry_stop - timedelta(hours=leave_duration)    
-                    end_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
-                record.state = 'work_entries_valid'
+                        work_entry_start = work_entry_stop - timedelta(hours=leave_duration)
+                    if work_entry_stop > work_entry_start:
+                        end_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
+                    else:
+                        record.message_post(body=_("Invalid work entry times after adjustment end: %s - end: %s." % (work_entry_start, work_entry_stop)))
+                        record.state = 'work_entries_error'
             except Exception as e:
                 record.message_post(body=_("Failed to fix work entries: %s" % str(e)))
                 record.state = 'work_entries_error'
