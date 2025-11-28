@@ -367,7 +367,7 @@ class HrAttendanceMiddleware(models.Model):
                 try:
                     record.hr_attendance_id.write(vals)
                     record.state = 'attendance_adjusted'
-                    record.message_post(body=_("HR Attendance adjusted successfully."))
+                    record.message_post(body=_("HR Attendance adjusted successfully vals: %s" % vals))
                     compute_overtime = True
                 except Exception as e:
                     record.message_post(body=_("Failed to adjust HR Attendance: %s" % str(e)))
@@ -375,7 +375,7 @@ class HrAttendanceMiddleware(models.Model):
             else:
                 try:
                     new_attendance = self.env['hr.attendance'].create(vals)
-                    record.message_post(body=_("HR Attendance created successfully."))
+                    record.message_post(body=_("HR Attendance created successfully vals: %s" % vals))
                     record.state = 'attendance_created'
                     compute_overtime = True
                 except Exception as e:
