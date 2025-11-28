@@ -11,12 +11,13 @@ class ZkAttendance(models.Model):
 
     is_settled = fields.Boolean(string='Settled', default=False, help='Indicates whether this attendance record has been settled into HR attendance middleware.')
 
-    def _get_grouped_data(self):
+    def _get_grouped_data(self, limit=1):
         groups = self.env['zk.attendance'].read_group(
             domain=[('id', 'in', self.ids), ('employee_id', '!=', False)],
             fields=['employee_id', 'att_date'],
             groupby=['employee_id', 'att_date:day'],
             lazy=False,
+            limit=limit
         )
         data = defaultdict(list)
         for group in groups:
@@ -37,8 +38,8 @@ class ZkAttendance(models.Model):
             existing_middleware_ids.extend(existing_records.ids)
         return data, existing_middleware_ids
 
-    def action_link_hr_attendance(self):
-        data, existing_middleware_ids = self._get_grouped_data()
+    def action_link_hr_attendance(self, limit=10):
+        data, existing_middleware_ids = self._get_grouped_data(limit=limit)
         formatted_data = self._format_hr_attendance_data(data)
         created_records = self.env['hr.attendance.middleware'].create(formatted_data)
         existing_middleware_ids.extend(created_records.ids)
@@ -59,12 +60,12 @@ class ZkAttendance(models.Model):
 
         return vals_list
 
-    def cron_auto_link_hr_attendance(self):
+    def cron_auto_link_hr_attendance(self, limit=10):
         _logger.info("Starting cron job to link ZK attendance records to HR attendance middleware.")
-        records = self.search([('is_settled', '=', False), ('att_date', '>=', '2025-10-26')])
+        records = self.search([('is_settled', '=', False), ('att_date', '>=', '2025-10-24')])
         _logger.info(f"Found {len(records)} ZK attendance records to process.")
         if records:
-            records.action_link_hr_attendance()
+            records.action_link_hr_attendance(limit=limit)
             _logger.info(f"Cron job completed: Linked {len(records)} ZK attendance records to HR attendance middleware.")
         else:
             _logger.info("Cron job completed: No ZK attendance records to link.")
