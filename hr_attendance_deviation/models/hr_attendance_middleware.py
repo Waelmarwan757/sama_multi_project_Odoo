@@ -371,8 +371,8 @@ class HrAttendanceMiddleware(models.Model):
                 vals.pop('employee_id')  # Employee cannot be changed on write
                 try:
                     record.hr_attendance_id.write(vals)
-                    record.state = 'attendance_adjusted'
                     record.message_post(body=_("HR Attendance adjusted successfully vals: %s" % vals))
+                    record.state = 'attendance_adjusted'
                     compute_overtime = True
                 except Exception as e:
                     record.message_post(body=_("Failed to adjust HR Attendance: %s" % str(e)))
