@@ -109,18 +109,20 @@ class HrAttendanceMiddleware(models.Model):
 
     @api.depends('employee_id', 'date')
     def _compute_working_times(self):
-        attendance_type = self.env.ref("hr_work_entry.work_entry_type_attendance")
+        # attendance_type = self.env.ref("hr_work_entry.work_entry_type_attendance")
         for record in self:
             if record.employee_id and record.date:
                 time_ids = []
                 contract = record.employee_id.contract_id
                 dayofweek = str(record.date.weekday())
                 if contract and contract.resource_calendar_id:
-                    working_times = contract.resource_calendar_id.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek and at.work_entry_type_id == attendance_type)
+                    # working_times = contract.resource_calendar_id.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek and at.work_entry_type_id == attendance_type)
+                    working_times = contract.resource_calendar_id.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek)
                     time_ids.extend([Command.link(at.id) for at in working_times])
                 if contract and contract.multi_shifts and contract.resource_calendar_ids:
                     for rc in contract.resource_calendar_ids:
-                        working_times = rc.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek and at.work_entry_type_id == attendance_type)
+                        # working_times = rc.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek and at.work_entry_type_id == attendance_type)
+                        working_times = rc.attendance_ids.filtered(lambda at: str(at.dayofweek) == dayofweek)
                         time_ids.extend([Command.link(at.id) for at in working_times])
                 record.working_time_ids = time_ids
                 if not time_ids:
@@ -273,7 +275,7 @@ class HrAttendanceMiddleware(models.Model):
                 hours_per_day = best_work_time.calendar_id.hours_per_day
                 # Analyze existing work entries
                 for work_entry in record.work_entry_ids:
-                    if work_entry.work_entry_type_id != work_entry_type_attendance:
+                    if work_entry.work_entry_type_id.code == 'LATE':
                         leave_duration += work_entry.duration
                     if not min_date_start or work_entry.date_start < min_date_start:
                         min_date_start = work_entry.date_start
@@ -285,7 +287,9 @@ class HrAttendanceMiddleware(models.Model):
                 if start_work_entry:
                     work_entry_start = record._convert_to_gmt_naive(record.date, hour_from_time) # Set anyway to shift start
                     work_entry_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
-                    if start_work_entry.work_entry_type_id != work_entry_type_attendance:
+                    if start_work_entry.work_entry_type_id.code == 'REST100':
+                        start_work_entry.work_entry_type_id = work_entry_type_attendance.id
+                    if start_work_entry.work_entry_type_id.code == 'LATE':
                         work_entry_stop = work_entry_start + timedelta(hours=leave_duration)
                     if work_entry_stop > work_entry_start:
                         start_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
@@ -296,7 +300,9 @@ class HrAttendanceMiddleware(models.Model):
                 if end_work_entry:
                     work_entry_stop = record._convert_to_gmt_naive(record.date, hour_to_time) # Set anyway to shift end
                     work_entry_start = work_entry_stop - timedelta(hours=hours_per_day - leave_duration)
-                    if end_work_entry.work_entry_type_id != work_entry_type_attendance:
+                    if end_work_entry.work_entry_type_id.code == 'REST100':
+                        end_work_entry.work_entry_type_id = work_entry_type_attendance.id
+                    if end_work_entry.work_entry_type_id.code == 'LATE':
                         work_entry_start = work_entry_stop - timedelta(hours=leave_duration)
                     if work_entry_stop > work_entry_start:
                         end_work_entry.write({'date_start': work_entry_start, 'date_stop': work_entry_stop})
