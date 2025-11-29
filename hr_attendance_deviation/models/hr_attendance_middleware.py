@@ -253,7 +253,7 @@ class HrAttendanceMiddleware(models.Model):
     def action_fix_work_entries(self, bulk=False):
         _logger.info(f"Fixing work entries for {len(self)} HR attendance middleware records.")
         work_entry_type_attendance = self.env.ref("hr_work_entry.work_entry_type_attendance")
-        records = self.filtered(lambda r: 'error' not in r.state)
+        records = self
         records.regenerate_work_entries()
         for record in records:
             best_work_time = record.force_best_work_time_id or record.best_work_time_id
@@ -348,7 +348,7 @@ class HrAttendanceMiddleware(models.Model):
 
     def action_adjust_or_create_hr_attendance(self, bulk=False):
         _logger.info(f"Adjusting or creating HR attendance for {len(self)} HR attendance middleware records.")
-        records = self.filtered(lambda r: 'error' not in r.state)
+        records = self
         zk_attendance_ids = []
         for record in records:
             zk_attendance_ids.extend(record.zk_attendance_ids.ids)
