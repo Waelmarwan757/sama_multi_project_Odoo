@@ -15,7 +15,7 @@ class ZkAttendance(models.Model):
         groups = self.env['zk.attendance'].read_group(
             domain=[('id', 'in', self.ids), ('employee_id', '!=', False)],
             fields=['employee_id', 'att_date'],
-            groupby=['employee_id', 'att_date:day'],
+            groupby=['att_date:day', 'employee_id'],
             lazy=False,
             limit=limit
         )
