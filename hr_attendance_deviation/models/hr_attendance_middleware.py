@@ -251,6 +251,7 @@ class HrAttendanceMiddleware(models.Model):
         return Converter.date_time_to_gmt_naive(date_obj, time_obj)
 
     def action_fix_work_entries(self, bulk=False):
+        _logger.info(f"Fixing work entries for {len(self)} HR attendance middleware records.")
         work_entry_type_attendance = self.env.ref("hr_work_entry.work_entry_type_attendance")
         records = self.filtered(lambda r: 'error' not in r.state)
         records.regenerate_work_entries()
@@ -305,8 +306,10 @@ class HrAttendanceMiddleware(models.Model):
             except Exception as e:
                 record.message_post(body=_("Failed to fix work entries: %s" % str(e)))
                 record.state = 'work_entries_error'
+        _logger.info(f"Fixed work entries for {len(self)} HR attendance middleware records.")
 
     def regenerate_work_entries(self):
+        _logger.info(f"Regenerating work entries for {len(self)} HR attendance middleware records.")
         regenerate_wizard = self.env['hr.work.entry.regeneration.wizard'].sudo()
         for record in self:
             wizard = regenerate_wizard.create({
@@ -344,6 +347,7 @@ class HrAttendanceMiddleware(models.Model):
             })
 
     def action_adjust_or_create_hr_attendance(self, bulk=False):
+        _logger.info(f"Adjusting or creating HR attendance for {len(self)} HR attendance middleware records.")
         records = self.filtered(lambda r: 'error' not in r.state)
         zk_attendance_ids = []
         for record in records:
@@ -388,6 +392,7 @@ class HrAttendanceMiddleware(models.Model):
                     record.state = 'attendance_creation_error'
             if compute_overtime:
                 record.hr_attendance_id._compute_overtime_hours()
+        _logger.info(f"Adjusted or created HR attendance for {len(records)} HR attendance middleware records.")
         return zk_attendance_ids
 
     def _get_forced_values(self):

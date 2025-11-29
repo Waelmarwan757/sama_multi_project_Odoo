@@ -40,10 +40,13 @@ class ZkAttendance(models.Model):
 
     def action_link_hr_attendance(self, limit=10):
         data, existing_middleware_ids = self._get_grouped_data(limit=limit)
+        _logger.info(f"Linking HR attendance for data: {len(data)}")
         formatted_data = self._format_hr_attendance_data(data)
         created_records = self.env['hr.attendance.middleware'].create(formatted_data)
+        _logger.info(f"Created {len(created_records)} HR attendance middleware records.")
         existing_middleware_ids.extend(created_records.ids)
         existing_middleware_records = self.env['hr.attendance.middleware'].browse(existing_middleware_ids)
+        _logger.info(f"Processing {len(existing_middleware_records)} existing HR attendance middleware records.")
         existing_middleware_records.action_fix_work_entries(bulk=True)
         zk_attendance_ids = existing_middleware_records.action_adjust_or_create_hr_attendance(bulk=True)
         self.browse(zk_attendance_ids).write({'is_settled': True})
