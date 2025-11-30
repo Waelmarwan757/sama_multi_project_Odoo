@@ -217,6 +217,7 @@ class HrAttendanceMiddleware(models.Model):
                 if record.check_in_computed:
                     time_diff_start = abs((record.check_in_computed - shift_start_datetime).total_seconds())
                     time_diff_end = abs((record.check_in_computed - shift_end_datetime).total_seconds())
+                    _logger.info(f"check_in_computed: {record.check_in_computed}, shift_start: {shift_start_datetime}, shift_end: {shift_end_datetime}")
                     _logger.info(f"Time difference to shift start: {time_diff_start}, to shift end: {time_diff_end}")
                     min_diff = min(time_diff_start, time_diff_end)
                     _logger.info(f"Minimum time difference: {min_diff}")
