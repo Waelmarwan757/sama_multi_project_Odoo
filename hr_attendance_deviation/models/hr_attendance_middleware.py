@@ -219,8 +219,10 @@ class HrAttendanceMiddleware(models.Model):
                     if min_diff < lowest_time_diff:
                         lowest_time_diff = min_diff
                         closest_shift = shift.id
-                    if record.check_out_computed and min_diff == lowest_time_diff and record.check_out_computed > shift_end_datetime:
-                        closest_shift = shift.id
+                    if closest_shift != shift and closest_shift.hour_to == shift.hour_from:
+                        closest_shift_start_datetime, closest_shift_end_datetime = record._get_shift_datetimes(closest_shift, date)
+                        if record.check_out_computed and min_diff == lowest_time_diff and record.check_out_computed > closest_shift_end_datetime:
+                            closest_shift = shift.id
                     if min_diff == time_diff_start:
                         closest_to = 'start'
                     else:
