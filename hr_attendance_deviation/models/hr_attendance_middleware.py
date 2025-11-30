@@ -26,6 +26,7 @@ class HrAttendanceMiddleware(models.Model):
     # General Information fields
     employee_id = fields.Many2one('hr.employee', string='Employee')
     date = fields.Date(string='Attendance Date')
+    attendance_day = fields.Char(string='Attendance Day', compute='_compute_attendance_day', store=True)
 
     # Computed fields
     hr_attendance_id = fields.Many2one('hr.attendance', string='HR Attendance', compute='_compute_hr_attendance')
@@ -68,6 +69,14 @@ class HrAttendanceMiddleware(models.Model):
     def _ondelete_unsettle_zk_attendance(self):
         for record in self:
             record.zk_attendance_ids.write({'is_settled': False})
+
+    @api.depends('date')
+    def _compute_attendance_day(self):
+        for record in self:
+            if record.date:
+                record.attendance_day = record.date.strftime('%A')
+            else:
+                record.attendance_day = False
 
     @api.constrains('employee_id', 'date')
     def _check_unique_attendance(self):

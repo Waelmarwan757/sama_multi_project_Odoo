@@ -136,6 +136,7 @@
                 <filter name="group_by_employee" string="Group by Employee" domain="[]" context="{'group_by': 'employee_id'}"/>
                 <filter name="group_by_state" string="Group by State"  domain="[]" context="{'group_by': 'state'}"/>
                 <filter name="group_by_date" string="Group by Date" domain="[]" context="{'group_by': 'date:day'}"/>
+                <filter name="group_by_attendance_day" string="Group by Attendance Day" domain="[]" context="{'group_by': 'attendance_day'}"/>
             </search>
         </field>
     </record>
