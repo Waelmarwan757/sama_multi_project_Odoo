@@ -208,28 +208,22 @@ class HrAttendanceMiddleware(models.Model):
             closest_shift = None
             closest_to = 'start'
             lowest_time_diff = float('inf')
-            _logger.info(f"Computing best work time for record ID {record.id} on date {date} with check-in {record.check_in_computed}")
             for shift in weekday_attendances:
-                _logger.info(f"Evaluating shift {shift.name}, hour_from: {shift.hour_from}, hour_to: {shift.hour_to}")
                 shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(shift, date)
 
                 # Check is closest to shift start or shift end
                 if record.check_in_computed:
                     time_diff_start = abs((record.check_in_computed - shift_start_datetime).total_seconds())
                     time_diff_end = abs((record.check_in_computed - shift_end_datetime).total_seconds())
-                    _logger.info(f"check_in_computed: {record.check_in_computed}, shift_start: {shift_start_datetime}, shift_end: {shift_end_datetime}")
-                    _logger.info(f"Time difference to shift start: {time_diff_start}, to shift end: {time_diff_end}")
                     min_diff = min(time_diff_start, time_diff_end)
-                    _logger.info(f"Minimum time difference: {min_diff}")
                     if min_diff < lowest_time_diff:
-                        _logger.info(f"New closest shift found: {shift.name} with time difference {min_diff}")
                         lowest_time_diff = min_diff
                         closest_shift = shift.id
+                    if record.check_out_computed and min_diff == lowest_time_diff and record.check_out_computed > shift_end_datetime:
+                        closest_shift = shift.id
                     if min_diff == time_diff_start:
-                        _logger.info(f"Closest to shift start for shift {shift.name}")
                         closest_to = 'start'
                     else:
-                        _logger.info(f"Closest to shift end for shift {shift.name}")
                         closest_to = 'end'
                     
             record.best_work_time_id = closest_shift
