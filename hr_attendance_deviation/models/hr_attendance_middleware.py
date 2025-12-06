@@ -307,7 +307,7 @@ class HrAttendanceMiddleware(models.Model):
                     work_entry_stop = work_entry_start + timedelta(hours=hours_per_day - leave_duration)
                     if start_work_entry.work_entry_type_id.code == 'REST100':
                         start_work_entry.work_entry_type_id = work_entry_type_attendance.id
-                        start_work_entry.copy({'work_entry_type_id': 11})
+                        # start_work_entry.copy({'work_entry_type_id': 11})
                     if start_work_entry.work_entry_type_id.code == 'LATE':
                         work_entry_stop = work_entry_start + timedelta(hours=leave_duration)
                     if work_entry_stop > work_entry_start:
