@@ -35,6 +35,6 @@ class HrAbsentEntry(models.Model):
                 ('date_stop', '<=', end_of_date),
                 '|',
                 ('work_entry_type_id', '!=', attendance_type.id),
-                ('work_entry_type_id.code', '=', 'LATE')
+                ('work_entry_type_id.code', '!=', 'LATE')
             ], limit=1)
             record.leave_entry_id = work_entries.id
