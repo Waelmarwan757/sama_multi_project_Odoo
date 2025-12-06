@@ -174,25 +174,29 @@ class HrAttendanceMiddleware(models.Model):
             in_mode = 'technical'
             out_mode = 'technical'
             punch_datetimes = []
-            systray_datetimes = []
+            internal_datetimes = [] # Datetimes coming from HR attendance (systray, manual, etc.)
+            internal_in_mode = 'systray'
+            internal_out_mode = 'systray'
             if record.employee_id and record.zk_attendance_ids:
                 punch_datetimes.extend(record._get_zk_api_datetimes())
             if record.hr_attendance_id:
-                if record.hr_attendance_id.check_in and record.hr_attendance_id.in_mode == 'systray':
+                if record.hr_attendance_id.check_in and record.hr_attendance_id.in_mode != 'technical':
                     punch_datetimes.append(record.hr_attendance_id.check_in)
-                    systray_datetimes.append(record.hr_attendance_id.check_in)
-                if record.hr_attendance_id.check_out and record.hr_attendance_id.out_mode == 'systray':
+                    internal_datetimes.append(record.hr_attendance_id.check_in)
+                    internal_in_mode = record.hr_attendance_id.in_mode
+                if record.hr_attendance_id.check_out and record.hr_attendance_id.out_mode != 'technical':
                     punch_datetimes.append(record.hr_attendance_id.check_out)
-                    systray_datetimes.append(record.hr_attendance_id.check_out)
+                    internal_datetimes.append(record.hr_attendance_id.check_out)
+                    internal_out_mode = record.hr_attendance_id.out_mode
             if punch_datetimes:
                 check_in = min(punch_datetimes)
                 check_out = max(punch_datetimes)
-                if check_in in systray_datetimes:
-                    in_mode = 'systray'
+                if check_in in internal_datetimes:
+                    in_mode = internal_in_mode
                 else:
                     in_mode = 'technical'
-                if check_out in systray_datetimes:
-                    out_mode = 'systray'
+                if check_out in internal_datetimes:
+                    out_mode = internal_out_mode
                 else:
                     out_mode = 'technical'
             record.in_mode = in_mode
