@@ -133,8 +133,8 @@ class HrLoan(models.Model):
     @api.constrains('date')
     def _check_date(self):
         today = fields.Date.today().day
-        loan_after_day = int(self.env['ir.config_parameter'].get_param('ohrms_loan.loan_after_month_day', default=10))
-        loan_before_day = int(self.env['ir.config_parameter'].get_param('ohrms_loan.loan_before_month_day', default=20))
+        loan_after_day = int(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_after_month_day', default=10))
+        loan_before_day = int(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_before_month_day', default=20))
         _logger.info("Today's date: %s", today)
         if today < loan_after_day or today > loan_before_day:
             raise ValidationError(
