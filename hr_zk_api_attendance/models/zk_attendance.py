@@ -42,9 +42,10 @@ class ZkAttendance(models.Model):
 
     @api.model
     def _get_attendance_report(self, headers, api_url, start_date=None, end_date=None):
-        default_day = date.today() - timedelta(days=1)
-        start_date = start_date or default_day.strftime('%Y-%m-%d')
-        end_date = end_date or default_day.strftime('%Y-%m-%d')
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        start_date = start_date or yesterday.strftime('%Y-%m-%d')
+        end_date = end_date or today.strftime('%Y-%m-%d')
         departments = ','.join(str(dep.zk_id) for dep in self.env['zk.department'].search([]))
         endpoint = f"/att/api/transactionReport/?page=1&page_size=200&start_date={start_date}&end_date={end_date}&departments={quote(departments)}&areas=-1&groups=-1&employees=-1"
         url = f"{api_url}{endpoint}"
