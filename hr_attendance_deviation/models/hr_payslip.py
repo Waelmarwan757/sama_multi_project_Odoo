@@ -53,6 +53,36 @@ class HrPayslip(models.Model):
         compute='_compute_weekend_days',
         help='Total weekend days for the payslip period.',
     )
+    timeoff_days = fields.Float(
+        string='Time Off Days',
+        compute='_compute_timeoff_days',
+        help='Total time off days for the payslip period.',
+    )
+    absent_days = fields.Float(
+        string='Absent Days',
+        compute='_compute_absent_days',
+        help='Total absent days for the payslip period.',   
+    )
+
+    @api.depends('days_attended', 'timeoff_days', 'weekend_days')
+    def _compute_absent_days(self):
+        for payslip in self:
+            total_days = (payslip.date_to - payslip.date_from).days + 1
+            payslip.absent_days = total_days - (payslip.days_attended + payslip.timeoff_days + payslip.weekend_days)
+
+    def _compute_timeoff_days(self):
+        attendance_type = self.env.ref('hr_work_entry.work_entry_type_attendance')
+        for payslip in self:
+            from_date_midnight = datetime.combine(payslip.date_from, time.min)
+            end_of_to_date = datetime.combine(payslip.date_to, time.max)
+            timeoff_entries = self.env['hr.work.entry'].search([
+                ('employee_id', '=', payslip.employee_id.id),
+                ('date_start', '>=', from_date_midnight),
+                ('date_stop', '<=', end_of_to_date),
+                ('work_entry_type_id', '!=', attendance_type.id),
+                ('work_entry_type_id.code', 'not in', ['LATE', 'REST100'])
+            ])
+            payslip.timeoff_days = len(timeoff_entries)
 
     def _compute_overtime_hours(self):
         for payslip in self:
