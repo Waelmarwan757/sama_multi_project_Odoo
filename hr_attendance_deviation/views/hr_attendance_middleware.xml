@@ -3,7 +3,7 @@
         <field name="name">hr.attendance.middleware.list</field>
         <field name="model">hr.attendance.middleware</field>
         <field name="arch" type="xml">
-            <list decoration-danger="late_check_in_state == 'late' or early_check_out_state == 'early'" decoration-success="late_check_in_state == 'approved' or early_check_out_state == 'approved'">
+            <list decoration-danger="late_check_in_state == 'late' or early_check_out_state == 'early'">
                 <header>
                     <button type="object" name="action_confirm_late_check_in" string="Confirm Late Check-In"/>
                     <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out"/>
@@ -143,6 +143,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="employee_id"/>
+                <filter name="late_check_in_state_filter" string="Late Check-In" domain="[('late_check_in_state', '=', 'late')]"/>
+                <filter name="early_check_out_state_filter" string="Early Check-Out" domain="[('early_check_out_state', '=', 'early')]"/>
                 <!-- <filter name="filter_by_this_month" string="This Month" domain="[('date', '&gt;=', (context_today().replace(day=1)).strftime('%%Y-%%m-%%d'))]"/> -->
                 <!-- <filter name="filter_by_today" string="Today" domain="[('date', '=', context_today().strftime('%%Y-%%m-%%d'))]"/> -->
                 <filter name="group_by_employee" string="Group by Employee" domain="[]" context="{'group_by': 'employee_id'}"/>
