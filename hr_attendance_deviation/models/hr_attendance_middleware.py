@@ -349,7 +349,7 @@ class HrAttendanceMiddleware(models.Model):
     def action_adjust_checkings(self):
         self._compute_checking_adjustments()
 
-    @api.depends('check_in_computed', 'check_out_computed', 'best_work_time_id', 'is_check_in_close_to_start')
+    @api.depends('check_in_computed', 'check_out_computed', 'best_work_time_id', 'force_best_work_time_id', 'is_check_in_close_to_start')
     def _compute_checking_adjustments(self):
         allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
         allowed_early_leaving_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_early_leaving_minutes', default=15)
