@@ -89,13 +89,14 @@ class HrAttendanceMiddleware(models.Model):
             if existing:
                 raise ValidationError(_("An attendance middleware record for employee %s on date %s already exists.") % (record.employee_id.name, record.date))
 
-    @api.depends('check_in_final', 'check_out_final', 'best_work_time_id', 'date')
+    @api.depends('check_in_final', 'check_out_final', 'best_work_time_id', 'force_best_work_time_id', 'date')
     def _compute_late_early_times(self):
         for record in self:
             late_duration = 0
             early_duration = 0
-            if record.best_work_time_id and record.date:
-                shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(record.best_work_time_id, record.date)
+            best_work_time = record.force_best_work_time_id or record.best_work_time_id
+            if best_work_time and record.date:
+                shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(best_work_time, record.date)
                 if record.check_in_final:
                     late_duration = (record.check_in_final - shift_start_datetime).total_seconds() / 60.0 / 60.0
                 if record.check_out_final:
@@ -244,12 +245,13 @@ class HrAttendanceMiddleware(models.Model):
                     
             record.best_work_time_id = closest_shift
 
-    @api.depends('best_work_time_id', 'check_in_computed', 'date')
+    @api.depends('best_work_time_id', 'force_best_work_time_id', 'check_in_computed', 'date')
     def _compute_is_check_in_close_to_start(self):
         for record in self:
             is_close = False
-            if record.best_work_time_id and record.check_in_computed:
-                shift = record.best_work_time_id
+            best_work_time = record.force_best_work_time_id or record.best_work_time_id
+            if best_work_time and record.check_in_computed:
+                shift = best_work_time
                 date = record.date
                 shift_start_datetime, shift_end_datetime = record._get_shift_datetimes(shift, date)
                 time_diff_start = abs((record.check_in_computed - shift_start_datetime).total_seconds())
@@ -356,9 +358,10 @@ class HrAttendanceMiddleware(models.Model):
         for record in self:
             check_in = record.check_in_computed
             check_out = record.check_out_computed
+            best_work_time = record.force_best_work_time_id or record.best_work_time_id
             try:
-                if record.best_work_time_id and check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
-                    hour_from_time, hour_to_time = record.best_work_time_id._get_time_objects()
+                if best_work_time and check_in and check_out and abs(check_in - check_out) < timedelta(minutes=check_in_out_tolerance_minutes):
+                    hour_from_time, hour_to_time = best_work_time._get_time_objects()
                     if record.is_check_in_close_to_start: # Check-in is correct
                         check_out = record._convert_to_gmt_naive(record.date, hour_to_time) - timedelta(minutes=allowed_early_leaving_minutes + 1) # Set check-out to shift end - (allowed early leaving + 1 minute) to apply penalty
                     else: # Check-out is correct
