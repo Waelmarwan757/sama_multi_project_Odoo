@@ -20,9 +20,21 @@ class HrAttendance(models.Model):
         help='Time in hours that the employee checked in late.',
         readonly=True,
     )
+    late_check_in_approved = fields.Boolean(
+        string='Late Check-In Approved',
+        default=False,
+        help='Indicates whether the late check-in has been approved.',
+        readonly=True,
+    )
     early_check_out = fields.Float(
         string='Early',
         help='Time in hours that the employee checked out early.',
+        readonly=True,
+    )
+    early_check_out_approved = fields.Boolean(
+        string='Early Check-Out Approved',
+        default=False,
+        help='Indicates whether the early check-out has been approved.',
         readonly=True,
     )
 

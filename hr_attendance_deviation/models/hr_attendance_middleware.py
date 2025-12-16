@@ -57,6 +57,16 @@ class HrAttendanceMiddleware(models.Model):
         store=True,
         help='Time in hours that the employee checked out early.',
     )
+    late_check_in_state = fields.Selection(
+        [('late', 'Late'), ('approved', 'Approved')],
+        string='Late Check-In State',
+        compute='_compute_late_early_times',
+    )
+    early_check_out_state = fields.Selection(
+        [('early', 'Early'), ('approved', 'Approved')],
+        string='Early Check-Out State',
+        compute='_compute_late_early_times',
+    )
 
     # Force fields
     force_best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Force Best Work Time', domain="[('id', 'in', working_time_ids)]", help='Manually set best work time to override computed value.', tracking=True)
@@ -91,6 +101,8 @@ class HrAttendanceMiddleware(models.Model):
 
     @api.depends('check_in_final', 'check_out_final', 'best_work_time_id', 'force_best_work_time_id', 'date')
     def _compute_late_early_times(self):
+        allowed_late_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_late_minutes', default=30)
+        allowed_early_leaving_minutes = self.env['ir.config_parameter'].sudo().get_param('hr_attendance_deviation.allowed_early_leaving_minutes', default=15)
         for record in self:
             late_duration = 0
             early_duration = 0
@@ -103,6 +115,14 @@ class HrAttendanceMiddleware(models.Model):
                     early_duration = (shift_end_datetime - record.check_out_final).total_seconds() / 60.0 / 60.0
             record.late_check_in = max(late_duration, 0)
             record.early_check_out = max(early_duration, 0)
+            if not record.late_check_in_state and record.late_check_in > (int(allowed_late_minutes) / 60.0):
+                record.late_check_in_state = 'late'
+            else:
+                record.late_check_in_state = record.late_check_in_state or False
+            if not record.early_check_out_state and record.early_check_out > (int(allowed_early_leaving_minutes) / 60.0):
+                record.early_check_out_state = 'early'
+            else:
+                record.early_check_out_state = record.early_check_out_state or False
 
     @api.depends('employee_id', 'date')
     def _compute_hr_attendance(self):
@@ -423,12 +443,24 @@ class HrAttendanceMiddleware(models.Model):
         _logger.info(f"Adjusted or created HR attendance for {len(records)} HR attendance middleware records.")
         return zk_attendance_ids
 
-    def action_confirm_late_early_times(self):
-        for record in self:
+    def action_confirm_late_check_in(self):
+        for record in self.filtered(lambda r: r.late_check_in_state == 'late'):
             vals = {
                 'late_check_in': record.force_late_check_in or record.late_check_in,
-                'early_check_out': record.force_early_check_out or record.early_check_out,
+                'late_check_in_approved': True,
             }
+            record.late_check_in_state = 'approved'
+            record.message_post(body=_("Confirming late check-in with value: %s hours." % vals['late_check_in']))
+            record.hr_attendance_id.write(vals)
+
+    def action_confirm_early_check_out(self):
+        for record in self.filtered(lambda r: r.early_check_out_state == 'early'):
+            vals = {
+                'early_check_out': record.force_early_check_out or record.early_check_out,
+                'early_check_out_approved': True,
+            }
+            record.early_check_out_state = 'approved'
+            record.message_post(body=_("Confirming early check-out with value: %s hours." % vals['early_check_out']))
             record.hr_attendance_id.write(vals)
 
     def _get_forced_values(self):

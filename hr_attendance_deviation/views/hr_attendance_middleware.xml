@@ -3,14 +3,17 @@
         <field name="name">hr.attendance.middleware.list</field>
         <field name="model">hr.attendance.middleware</field>
         <field name="arch" type="xml">
-            <list>
+            <list decoration-danger="late_check_in_state == 'late' or early_check_out_state == 'early'" decoration-success="late_check_in_state == 'approved' or early_check_out_state == 'approved'">
                 <header>
-                    <button type="object" name="action_confirm_late_early_times" string="Confirm Late/Early Times"/>
+                    <button type="object" name="action_confirm_late_check_in" string="Confirm Late Check-In"/>
+                    <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out"/>
                 </header>
                 <field name="employee_id"/>
                 <field name="date"/>
                 <field name="late_check_in"/>
                 <field name="early_check_out"/>
+                <field name="late_check_in_state"/>
+                <field name="early_check_out_state"/>
             </list>
         </field>
     </record>
@@ -23,8 +26,11 @@
                 <header>
                     <!-- <button type="object" name="action_fix_work_entries" string="Fix Work Entries"/> -->
                     <!-- <button type="object" name="action_adjust_checkings" string="Adjust Checkings"/> -->
+                    <field name="force_late_check_in" invisible="1"/>
+                    <field name="force_early_check_out" invisible="1"/>
                     <button type="object" name="action_adjust_or_create_hr_attendance" string="Adjust or Create Attendance"/>
-                    <button type="object" name="action_confirm_late_early_times" string="Confirm Late/Early Times"/>
+                    <button type="object" name="action_confirm_late_check_in" string="Confirm Late Check-In" invisible="not late_check_in and not force_late_check_in"/>
+                    <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out" invisible="not early_check_out and not force_early_check_out"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,work_entries_valid"/>
                 </header>
                 <sheet>
