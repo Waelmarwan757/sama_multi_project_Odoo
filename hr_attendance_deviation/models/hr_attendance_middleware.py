@@ -388,8 +388,8 @@ class HrAttendanceMiddleware(models.Model):
                 'employee_id': record.employee_id.id,
                 'check_in': check_in,
                 'check_out': check_out,
-                'late_check_in': force_late_check_in or record.late_check_in,
-                'early_check_out': force_early_check_out or record.early_check_out,
+                # 'late_check_in': force_late_check_in or record.late_check_in,
+                # 'early_check_out': force_early_check_out or record.early_check_out,
                 'in_mode': in_mode,
                 'out_mode': out_mode,
                 'zk_attendance_ids': [Command.set(record.zk_attendance_ids.ids)],
@@ -419,6 +419,14 @@ class HrAttendanceMiddleware(models.Model):
                 record.hr_attendance_id._compute_overtime_hours()
         _logger.info(f"Adjusted or created HR attendance for {len(records)} HR attendance middleware records.")
         return zk_attendance_ids
+
+    def action_confirm_late_early_times(self):
+        for record in self:
+            vals = {
+                'late_check_in': record.force_late_check_in or record.late_check_in,
+                'early_check_out': record.force_early_check_out or record.early_check_out,
+            }
+            record.hr_attendance_id.write(vals)
 
     def _get_forced_values(self):
         self.ensure_one()
