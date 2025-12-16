@@ -142,9 +142,9 @@ class HrPayslip(models.Model):
                 ('check_in', '>=', from_date_midnight),
                 ('check_in', '<=', end_of_to_date)
             ])
-            late_days_hours = attendances.get_late_days_hours()
+            late_days_hours = attendances.filtered('late_check_in_approved').get_late_days_hours()
             payslip.late_days = late_days_hours['late_days']
             payslip.late_hours = late_days_hours['late_hours']
-            early_leaving_days_hours = attendances.get_early_leaving_days_hours()
+            early_leaving_days_hours = attendances.filtered('early_check_out_approved').get_early_leaving_days_hours()
             payslip.early_leaving_days = early_leaving_days_hours['early_leaving_days']
             payslip.early_leaving_hours = early_leaving_days_hours['early_leaving_hours']
