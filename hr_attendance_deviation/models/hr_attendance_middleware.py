@@ -61,11 +61,13 @@ class HrAttendanceMiddleware(models.Model):
         [('late', 'Late'), ('approved', 'Approved')],
         string='Late Check-In State',
         compute='_compute_late_early_times',
+        store=True,
     )
     early_check_out_state = fields.Selection(
         [('early', 'Early'), ('approved', 'Approved')],
         string='Early Check-Out State',
         compute='_compute_late_early_times',
+        store=True,
     )
 
     # Force fields
