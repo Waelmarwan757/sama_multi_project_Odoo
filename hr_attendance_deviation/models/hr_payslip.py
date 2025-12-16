@@ -68,7 +68,7 @@ class HrPayslip(models.Model):
     def _compute_absent_days(self):
         for payslip in self:
             total_days = (payslip.date_to - payslip.date_from).days + 1
-            payslip.absent_days = total_days - payslip.days_attended
+            payslip.absent_days = max(total_days - (payslip.days_attended + payslip.timeoff_days + payslip.weekend_days), 0)
 
     def _compute_timeoff_days(self):
         attendance_type = self.env.ref('hr_work_entry.work_entry_type_attendance')
