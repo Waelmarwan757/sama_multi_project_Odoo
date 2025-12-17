@@ -119,6 +119,9 @@ class HrLoan(models.Model):
 
     @api.constrains('employee_id', 'loan_amount')
     def _check_max_loan_amount(self):
+        is_admin = self.env.user.has_group('base.group_system')
+        if is_admin:
+            return
         for loan in self:
             max_loan = int(loan.employee_id.contract_id.wage) / 2
             if not max_loan:
@@ -132,6 +135,9 @@ class HrLoan(models.Model):
 
     @api.constrains('date')
     def _check_date(self):
+        is_admin = self.env.user.has_group('base.group_system')
+        if is_admin:
+            return
         today = fields.Date.today().day
         loan_after_day = int(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_after_month_day', default=10))
         loan_before_day = int(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_before_month_day', default=20))
@@ -158,22 +164,24 @@ class HrLoan(models.Model):
         """ Check whether any pending loan is for the employee and calculate
             the sequence
             :param values : Dictionary which contain fields and values"""
-        pending_loan_count = self.env['hr.loan'].search_count(
-            [('employee_id', '=', values['employee_id']),
-             ('state', '=', 'approve'),
-             ('balance_amount', '!=', 0)])
-        if pending_loan_count:
-            raise ValidationError(
-                _("The Employee has already a pending installment"))
-        draft_loan_count = self.env['hr.loan'].search_count(
-            [('employee_id', '=', values['employee_id']),
-             ('state', '=', 'draft')])
-        if draft_loan_count:
-            raise ValidationError(
-                _("The Employee has already a draft loan request"))
-        else:
-            values['name'] = self.env['ir.sequence'].get('hr.loan.seq') or ' '
-            return super(HrLoan, self).create(values)
+        is_admin = self.env.user.has_group('base.group_system')
+        if not is_admin:
+            pending_loan_count = self.env['hr.loan'].search_count(
+                [('employee_id', '=', values['employee_id']),
+                 ('state', '=', 'approve'),
+                 ('balance_amount', '!=', 0)])
+            if pending_loan_count:
+                raise ValidationError(
+                    _("The Employee has already a pending installment"))
+            draft_loan_count = self.env['hr.loan'].search_count(
+                [('employee_id', '=', values['employee_id']),
+                 ('state', '=', 'draft')])
+            if draft_loan_count:
+                raise ValidationError(
+                    _("The Employee has already a draft loan request"))
+        
+        values['name'] = self.env['ir.sequence'].get('hr.loan.seq') or ' '
+        return super(HrLoan, self).create(values)
 
     def action_compute_installment(self):
         """This automatically create the installment the employee need to pay to
