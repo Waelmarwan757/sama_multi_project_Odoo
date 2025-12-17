@@ -22,11 +22,17 @@
                             <group>
                                 <separator string="Overtime"/>
                                     <field name="overtime_hours" widget="float_time"/>
-                                <separator string="Attendance &amp; Time Off"/>
+                                <separator string="Attendance"/>
                                     <field name="days_attended"/>
                                     <field name="weekend_days"/>
-                                    <field name="timeoff_days"/>
                                     <field name="absent_days"/>
+                                <separator string="Time Off"/>
+                                    <field name="generic_timeoff_days"/>
+                                    <field name="sick_timeoff_days"/>
+                                    <field name="casual_timeoff_days"/>
+                                    <field name="paid_timeoff_days"/>
+                                    <field name="unpaid_leaves"/>
+                                    <field name="timeoff_days" string="Total All"/>
                             </group>
                         </group>
                     </page>

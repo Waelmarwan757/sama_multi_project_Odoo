@@ -63,6 +63,26 @@ class HrPayslip(models.Model):
         compute='_compute_absent_days',
         help='Total absent days for the payslip period.',   
     )
+    generic_timeoff_days = fields.Float(
+        string='Generic Time Off',
+        compute='_compute_timeoff_days',
+    )
+    unpaid_leaves = fields.Float(
+        string='Unpaid Leaves',
+        compute='_compute_timeoff_days',
+    )
+    sick_timeoff_days = fields.Float(
+        string='Sick Time Off',
+        compute='_compute_timeoff_days',
+    )
+    paid_timeoff_days = fields.Float(
+        string='Paid Time Off',
+        compute='_compute_timeoff_days',
+    )
+    casual_timeoff_days = fields.Float(
+        string='Casual Time Off',
+        compute='_compute_timeoff_days',
+    )
 
     @api.depends('days_attended', 'timeoff_days', 'weekend_days')
     def _compute_absent_days(self):
@@ -83,6 +103,11 @@ class HrPayslip(models.Model):
                 ('work_entry_type_id.code', 'not in', ['LATE', 'REST100'])
             ])
             payslip.timeoff_days = len(timeoff_entries)
+            payslip.generic_timeoff_days = len(timeoff_entries.filtered(lambda entry: entry.work_entry_type_id.code == 'LEAVE100'))
+            payslip.unpaid_leaves = len(timeoff_entries.filtered(lambda entry: entry.work_entry_type_id.code == 'LEAVE90'))
+            payslip.sick_timeoff_days = len(timeoff_entries.filtered(lambda entry: entry.work_entry_type_id.code == 'LEAVE110'))
+            payslip.paid_timeoff_days = len(timeoff_entries.filtered(lambda entry: entry.work_entry_type_id.code == 'LEAVE120'))
+            payslip.casual_timeoff_days = len(timeoff_entries.filtered(lambda entry: entry.work_entry_type_id.code == 'CAS100'))
 
     def _compute_overtime_hours(self):
         for payslip in self:
