@@ -59,17 +59,14 @@ class HrEmployee(models.Model):
             start_date = fields.Date.today().replace(day=1)
             end_date = fields.Date.today()
         attendance_date_list = self._get_attendece_dates(start_date, end_date)
-        existing_absent_date_list = self._get_absent_dates(start_date, end_date)
-        current_date = start_date
+        self._unlink_existing_absent_entry(start_date, end_date)
         vals_list = []
-        while current_date <= end_date:
-            if (current_date not in attendance_date_list) and (current_date not in existing_absent_date_list):
-                vals_list.append({
-                    'employee_id': self.id,
-                    'date': current_date,
-                    'reason': 'Generated absent entry'
-                })
-            current_date += timedelta(days=1)
+        for current_date in attendance_date_list:
+            vals_list.append({
+                'employee_id': self.id,
+                'date': current_date,
+                'reason': 'Generated absent entry'
+            })
         if vals_list:
             self.env['hr.absent.entry'].create(vals_list)
 
@@ -85,14 +82,14 @@ class HrEmployee(models.Model):
         ])
         return [date_time.date() for date_time in attendance_records.mapped('check_in')]
 
-    def _get_absent_dates(self, date_from, date_to):
+    def _unlink_existing_absent_entry(self, date_from, date_to):
         self.ensure_one()
         absent_entries = self.env['hr.absent.entry'].search([
             ('employee_id', '=', self.id),
             ('date', '>=', date_from),
             ('date', '<=', date_to)
         ])
-        return absent_entries.mapped('date')
+        absent_entries.sudo().unlink()
     
     def action_view_absent_entries(self):
         self.ensure_one()
