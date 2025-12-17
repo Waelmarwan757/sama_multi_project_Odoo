@@ -119,15 +119,18 @@ class HrAttendanceMiddleware(models.Model):
                     early_duration = (shift_end_datetime - record.check_out_final).total_seconds() / 60.0 / 60.0
             record.late_check_in = max(late_duration, 0)
             record.early_check_out = max(early_duration, 0)
-            if (not record.late_check_in_state == 'approved') and record.late_check_in > (int(allowed_late_minutes) / 60.0):
+            if record.late_check_in_state == 'approved':
+                record.late_check_in_state = 'approved'
+            elif (not record.late_check_in_state == 'approved') and record.late_check_in > (int(allowed_late_minutes) / 60.0):
                 record.late_check_in_state = 'late'
             else:
-                record.late_check_in_state = record.late_check_in_state or False
-            if (not record.early_check_out_state == 'approved') and record.early_check_out > (int(allowed_early_leaving_minutes) / 60.0):
+                record.late_check_in_state = False
+            if record.early_check_out_state == 'approved':
+                record.early_check_out_state = 'approved'
+            elif (not record.early_check_out_state == 'approved') and record.early_check_out > (int(allowed_early_leaving_minutes) / 60.0):
                 record.early_check_out_state = 'early'
             else:
-                record.early_check_out_state = record.early_check_out_state or False
-
+                record.early_check_out_state = False
     @api.depends('employee_id', 'date')
     def _compute_hr_attendance(self):
         for record in self:
