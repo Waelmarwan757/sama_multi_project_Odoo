@@ -28,7 +28,7 @@
                     <!-- <button type="object" name="action_adjust_checkings" string="Adjust Checkings"/> -->
                     <field name="force_late_check_in" invisible="1"/>
                     <field name="force_early_check_out" invisible="1"/>
-                    <button type="object" name="action_adjust_or_create_hr_attendance" string="Adjust or Create Attendance"/>
+                    <button type="object" name="action_adjust_or_create_hr_attendance" string="Adjust or Create Attendance" groups="hr_attendance_deviation.group_hr_attendance_middleware_admin"/>
                     <button type="object" name="action_confirm_late_check_in" string="Confirm Late Check-In" invisible="not late_check_in and not force_late_check_in"/>
                     <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out" invisible="not early_check_out and not force_early_check_out"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,work_entries_valid"/>
@@ -162,14 +162,30 @@
         <field name="context">{'search_default_filter_by_this_month': 1, 'search_default_group_by_state': 1, 'search_default_group_by_date': 1}</field>
     </record>
 
+    <record id="action_hr_attendance_middleware_team" model="ir.actions.act_window">
+        <field name="name">Attendance Middleware (Team)</field>
+        <field name="res_model">hr.attendance.middleware</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('employee_id.parent_id.user_id', '=', user.id), '|', ('late_check_in_state', '=', 'late'), ('early_check_out_state', '=', 'early')]</field>
+        <field name="context">{'search_default_filter_by_this_month': 1, 'search_default_group_by_state': 1, 'search_default_group_by_date': 1}</field>
+    </record>
+
     <menuitem id="menu_hr_attendance_middleware_root"
                 name="Attendance Middleware"
                 parent="hr.menu_hr_root"
                 sequence="100"/>
 
     <menuitem id="menu_hr_attendance_middleware"
-                name="Attendance Middleware"
+                name="Attendance Middleware (All Employees)"
                 parent="menu_hr_attendance_middleware_root"
                 action="action_hr_attendance_middleware"
+                groups="hr_attendance_deviation.group_hr_attendance_middleware_admin"
                 sequence="10"/>
+                
+    <menuitem id="menu_hr_attendance_middleware_team"
+                name="Attendance Middleware (Team)"
+                parent="menu_hr_attendance_middleware_root"
+                action="action_hr_attendance_middleware_team"
+                groups="hr_attendance_deviation.group_hr_attendance_middleware_user"
+                sequence="20"/>
 </odoo>
