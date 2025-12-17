@@ -72,6 +72,7 @@ class HrPayslipRun(models.Model):
 
     def close_payslip_run(self):
         """Function for state change"""
+        self.slip_ids.action_payslip_done()
         return self.write({'state': 'close'})
 
     def action_view_payslips(self):
