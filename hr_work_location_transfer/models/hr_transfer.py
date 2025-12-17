@@ -54,8 +54,10 @@ class HrTransfer(models.Model):
     def action_done(self):
         for record in self:
             record.employee_id.work_location_id = record.new_location_id.id
+            record.employee_id.address_id = record.new_location_id.address_id.id
             if record.new_parent_id:
                 record.employee_id.parent_id = record.new_parent_id.id
+                record.employee_id.coach_id = record.new_parent_id.id
             else:
                 record.message_post(body="No new manager assigned during transfer.")
             if record.new_leave_manager_id:
