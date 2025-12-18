@@ -94,6 +94,8 @@ class HrMission(models.Model):
                     ('date_stop', '<=', end_of_date),
                     ('work_entry_type_id', '=', attendance_work_type.id)
                 ])
+                if not work_entry:
+                    raise ValidationError(f"No attendance work entry found for {record.employee_id.name} on {current_date}. Please ensure attendance is recorded before approving the mission.")
                 vals_list.append({
                     'employee_id': record.employee_id.id,
                     'check_in': work_entry.date_start,
