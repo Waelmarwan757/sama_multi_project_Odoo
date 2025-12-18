@@ -60,13 +60,16 @@ class HrEmployee(models.Model):
             end_date = fields.Date.today()
         attendance_date_list = self._get_attendece_dates(start_date, end_date)
         self._unlink_existing_absent_entry(start_date, end_date)
+        current_date = start_date
         vals_list = []
-        for current_date in attendance_date_list:
-            vals_list.append({
-                'employee_id': self.id,
-                'date': current_date,
-                'reason': 'Generated absent entry'
-            })
+        while current_date <= end_date:
+            if (current_date not in attendance_date_list):
+                vals_list.append({
+                    'employee_id': self.id,
+                    'date': current_date,
+                    'reason': 'Generated absent entry'
+                })
+            current_date += timedelta(days=1)
         if vals_list:
             self.env['hr.absent.entry'].create(vals_list)
 
