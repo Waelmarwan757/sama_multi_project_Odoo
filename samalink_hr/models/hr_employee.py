@@ -62,7 +62,7 @@ class HrEmployee(models.Model):
         grouped_attendance_dates = self._get_grouped_attendece_dates(start_date, end_date)
         vals_list = []
         for employee in self:
-            employee_attendance_dates = grouped_attendance_dates.get(employee, [])
+            employee_attendance_dates = grouped_attendance_dates.get(employee.id, [])
             current_date = start_date
             while current_date <= end_date:
                 if (current_date not in employee_attendance_dates):
