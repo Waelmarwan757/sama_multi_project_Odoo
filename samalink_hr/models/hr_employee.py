@@ -1,3 +1,4 @@
+import defaultdict
 import logging
 from datetime import datetime, time, timedelta
 from odoo import models, fields, api, _
@@ -54,41 +55,44 @@ class HrEmployee(models.Model):
         user = self.env['res.users'].sudo().create(vals)
 
     def action_generate_absent_entries(self, start_date=None, end_date=None):
-        self.ensure_one()
         if not start_date or not end_date:
             start_date = fields.Date.today().replace(day=1)
             end_date = fields.Date.today()
-        attendance_date_list = self._get_attendece_dates(start_date, end_date)
         self._unlink_existing_absent_entry(start_date, end_date)
-        current_date = start_date
+        grouped_attendance_dates = self._get_grouped_attendece_dates(start_date, end_date)
         vals_list = []
-        while current_date <= end_date:
-            if (current_date not in attendance_date_list):
-                vals_list.append({
-                    'employee_id': self.id,
-                    'date': current_date,
-                    'reason': 'Generated absent entry'
-                })
-            current_date += timedelta(days=1)
+        for employee in self:
+            employee_attendance_dates = grouped_attendance_dates.get(employee, [])
+            current_date = start_date
+            while current_date <= end_date:
+                if (current_date not in employee_attendance_dates):
+                    vals_list.append({
+                        'employee_id': employee.id,
+                        'date': current_date,
+                        'reason': 'Generated absent entry'
+                    })
+                current_date += timedelta(days=1)
         if vals_list:
             self.env['hr.absent.entry'].create(vals_list)
 
-    def _get_attendece_dates(self, date_from, date_to):
-        self.ensure_one()
+    def _get_grouped_attendece_dates(self, date_from, date_to):
         date_midnight = datetime.combine(date_from, time.min)
         end_of_date = datetime.combine(date_to, time.max)
         domain = [('check_in', '>=', date_midnight), ('check_in', '<=', end_of_date)]
         attendance_records = self.env['hr.attendance'].search([
-            ('employee_id', '=', self.id),
+            ('employee_id', 'in', self.ids),
             ('check_in', '>=', date_from),
             ('check_out', '<=', date_to)
         ])
-        return [date_time.date() for date_time in attendance_records.mapped('check_in')]
+        grouped_attendance = attendance_records.grouped('employee_id')
+        attendance_mapped = defaultdict(list)
+        for employee, attendance in grouped_attendance.items():
+            attendance_mapped[employee.id] = [date_time.date() for date_time in attendance.mapped('check_in')]
+        return attendance_mapped
 
     def _unlink_existing_absent_entry(self, date_from, date_to):
-        self.ensure_one()
         absent_entries = self.env['hr.absent.entry'].search([
-            ('employee_id', '=', self.id),
+            ('employee_id', 'in', self.ids),
             ('date', '>=', date_from),
             ('date', '<=', date_to)
         ])
