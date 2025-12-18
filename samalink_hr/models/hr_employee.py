@@ -1,4 +1,4 @@
-import defaultdict
+from collections import defaultdict
 import logging
 from datetime import datetime, time, timedelta
 from odoo import models, fields, api, _
