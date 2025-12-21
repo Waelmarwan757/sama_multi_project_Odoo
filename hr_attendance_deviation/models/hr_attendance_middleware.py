@@ -71,7 +71,7 @@ class HrAttendanceMiddleware(models.Model):
         store=True,
         help='Early leaving more than 15 minutes unless approved.',
     )
-    late_early_request_id = fields.Many2one('hr.leave', string='Late/Early Leave Request', help='Link to the leave request for late check-in or early check-out approval.', compute='_compute_late_early_request_id', store=True, precompute=True)
+    late_early_request_id = fields.Many2one('hr.leave', string='Late/Early Leave Request', help='Link to the leave request for late check-in or early check-out approval.', compute='_compute_late_early_request_id', store=True)
 
     # Force fields
     force_best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Force Best Work Time', domain="[('id', 'in', working_time_ids)]", help='Manually set best work time to override computed value.', tracking=True)

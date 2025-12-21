@@ -14,7 +14,7 @@
                 <field name="early_check_out" widget="float_time"/>
                 <field name="late_check_in_state"/>
                 <field name="early_check_out_state"/>
-                <!-- <field name="late_early_request_id"/> -->
+                <field name="late_early_request_id"/>
             </list>
         </field>
     </record>
@@ -41,7 +41,7 @@
                         </group>
                         <group>
                             <field name="date" readonly="date" force_save="1"/>
-                            <!-- <field name="late_early_request_id" invisible="not late_early_request_id"/> -->
+                            <field name="late_early_request_id" invisible="not late_early_request_id"/>
                         </group>
                     </group>
                     <notebook>
@@ -147,7 +147,7 @@
                 <field name="employee_id"/>
                 <filter name="late_check_in_state_filter" string="Late Check-In" domain="[('late_check_in_state', '=', 'late')]"/>
                 <filter name="early_check_out_state_filter" string="Early Check-Out" domain="[('early_check_out_state', '=', 'early')]"/>
-                <!-- <filter name="no_late_early_request_filter" string="No Late/Early Request" domain="[('late_early_request_id', '=', False)]"/> -->
+                <filter name="no_late_early_request_filter" string="No Late/Early Request" domain="[('late_early_request_id', '=', False)]"/>
                 <!-- <filter name="filter_by_this_month" string="This Month" domain="[('date', '&gt;=', (context_today().replace(day=1)).strftime('%%Y-%%m-%%d'))]"/> -->
                 <!-- <filter name="filter_by_today" string="Today" domain="[('date', '=', context_today().strftime('%%Y-%%m-%%d'))]"/> -->
                 <filter name="group_by_employee" string="Group by Employee" domain="[]" context="{'group_by': 'employee_id'}"/>
