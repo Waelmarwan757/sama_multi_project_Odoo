@@ -80,9 +80,12 @@ class HrAttendanceMiddleware(models.Model):
     force_late_check_in = fields.Float(string='Force Late In', help='Manually set late check-in hours to override computed value.', tracking=True)
     force_early_check_out = fields.Float(string='Force Early Out', help='Manually set early check-out hours to override computed value.', tracking=True)
 
-    @api.depends('employee_id', 'date')
+    @api.depends('employee_id', 'date', 'late_check_in_state', 'early_check_out_state')
     def _compute_has_late_early_request(self):
         for record in self:
+            if record.late_check_in_state != 'late' and record.early_check_out_state != 'early':
+                record.has_late_early_request = False
+                continue
             leave_request_count = self.env['hr.leave'].sudo().search_count([
                 ('employee_id', '=', record.employee_id.id),
                 ('state', '=', 'validate'),
