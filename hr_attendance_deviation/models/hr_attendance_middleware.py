@@ -71,6 +71,7 @@ class HrAttendanceMiddleware(models.Model):
         store=True,
         help='Early leaving more than 15 minutes unless approved.',
     )
+    late_early_request_id = fields.Many2one('hr.leave', string='Late/Early Leave Request', help='Link to the leave request for late check-in or early check-out approval.', compute='_compute_late_early_request_id', store=True, precompute=True)
 
     # Force fields
     force_best_work_time_id = fields.Many2one('resource.calendar.attendance', string='Force Best Work Time', domain="[('id', 'in', working_time_ids)]", help='Manually set best work time to override computed value.', tracking=True)
@@ -78,6 +79,17 @@ class HrAttendanceMiddleware(models.Model):
     force_check_out = fields.Float(string='Force Out', help='Manually set check-out time to override computed value.', tracking=True)
     force_late_check_in = fields.Float(string='Force Late In', help='Manually set late check-in hours to override computed value.', tracking=True)
     force_early_check_out = fields.Float(string='Force Early Out', help='Manually set early check-out hours to override computed value.', tracking=True)
+
+    @api.depends('employee_id', 'date')
+    def late_early_request_id(self):
+        for record in self:
+            leave_request = self.env['hr.leave'].search([
+                ('employee_id', '=', record.employee_id.id),
+                ('state', '=', 'validate'),
+                ('request_date_from', '=', record.date),
+                ('holiday_status_id.code', '=', 'LATE'),
+            ], limit=1)
+            record.late_early_request_id = leave_request.id
 
     @api.ondelete(at_uninstall=True)
     def _ondelete_unsettle_zk_attendance(self):
