@@ -457,6 +457,7 @@ class HrAttendanceMiddleware(models.Model):
                     record.message_post(body=_("HR Attendance created successfully vals: %s" % vals))
                     record.state = 'attendance_created'
                     compute_overtime = True
+                    record.hr_attendance_id = new_attendance.id
                 except Exception as e:
                     record.message_post(body=_("Failed to create HR Attendance: %s" % str(e)))
                     record.state = 'attendance_creation_error'
