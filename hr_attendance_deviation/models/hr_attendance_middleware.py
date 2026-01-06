@@ -29,7 +29,7 @@ class HrAttendanceMiddleware(models.Model):
     attendance_day = fields.Char(string='Attendance Day', compute='_compute_attendance_day', store=True)
 
     # Computed fields
-    hr_attendance_id = fields.Many2one('hr.attendance', string='HR Attendance', compute='_compute_hr_attendance', store=True)
+    hr_attendance_id = fields.Many2one('hr.attendance', string='HR Attendance', compute='_compute_hr_attendance', store=True, precompute=True)
     working_time_ids = fields.Many2many('resource.calendar.attendance', string='Working Times', compute='_compute_working_times')
     work_entry_ids = fields.Many2many('hr.work.entry', string='Work Entries', compute='_compute_work_entries')
     zk_attendance_ids = fields.Many2many('zk.attendance', string='ZK Attendances', compute='_compute_zk_attendances')
