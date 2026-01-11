@@ -38,7 +38,7 @@ class HrPayslip(models.Model):
         the payslip."""
         res = super(HrPayslip, self).get_inputs(contract_ids, date_from,
                                                 date_to)
-        employee_id = self.env['hr.contract'].browse(
+        employee_id = self.env['hr.contract'].sudo().browse(
             contract_ids[0].id).employee_id if contract_ids \
             else self.employee_id
         loan_lines = self.env['hr.loan.line'].search(

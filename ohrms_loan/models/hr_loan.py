@@ -123,7 +123,7 @@ class HrLoan(models.Model):
         if is_admin:
             return
         for loan in self:
-            max_loan = int(loan.employee_id.contract_id.wage) / 2
+            max_loan = int(loan.employee_id.sudo().contract_id.wage) / 2
             if not max_loan:
                 raise ValidationError(
                     _("The employee does not have a valid contract "
