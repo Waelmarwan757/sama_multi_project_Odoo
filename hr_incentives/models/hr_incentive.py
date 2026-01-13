@@ -7,8 +7,10 @@ class HrIncentive(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'HR Incentive'
     _rec_name = 'employee_id'
+    _check_company_auto = True
 
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    company_id = fields.Many2one('res.company', related='employee_id.company_id', string='Company', store=True)
     current_contract_id = fields.Many2one('hr.contract', related='employee_id.contract_id', string='Contract', store=True)
     type = fields.Selection([
         ('bonus', 'Bonus'),

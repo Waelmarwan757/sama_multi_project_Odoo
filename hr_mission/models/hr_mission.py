@@ -10,12 +10,14 @@ class HrMission(models.Model):
     _inherit = ['mail.thread']
     _description = 'HR Mission'
     _rec_name = 'employee_id'
+    _check_company_auto = True
 
     def _default_employee(self):
         employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         return employee.id if employee else False
 
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True, tracking=True, default=_default_employee)
+    company_id = fields.Many2one('res.company', related='employee_id.company_id', string='Company', store=True)
     department_id = fields.Many2one('hr.department', string='Department', related='employee_id.department_id')
     current_location_id = fields.Many2one('hr.work.location', related='employee_id.work_location_id')
     manager_id = fields.Many2one('hr.employee', string='Manager', related='employee_id.parent_id')

@@ -11,6 +11,7 @@ class HrAttendanceMiddleware(models.Model):
     _name = 'hr.attendance.middleware'
     _inherit = ['mail.thread']
     _description = 'HR Attendance Middleware'
+    _check_company_auto = True
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -25,6 +26,7 @@ class HrAttendanceMiddleware(models.Model):
 
     # General Information fields
     employee_id = fields.Many2one('hr.employee', string='Employee')
+    company_id = fields.Many2one('res.company', related='employee_id.company_id', string='Company', store=True)
     date = fields.Date(string='Attendance Date')
     attendance_day = fields.Char(string='Attendance Day', compute='_compute_attendance_day', store=True)
 

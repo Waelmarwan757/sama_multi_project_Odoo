@@ -34,6 +34,7 @@ class HrLoan(models.Model):
     _name = 'hr.loan'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Loan Request"
+    _check_company_auto = True
 
     @api.model
     def default_get(self, field_list):

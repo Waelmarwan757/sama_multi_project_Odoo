@@ -14,10 +14,12 @@ class ZkAttendance(models.Model):
     _name = 'zk.attendance'
     _description = 'ZK Attendance'
     _rec_name = 'emp_code'
+    _check_company_auto = True
 
     zk_id = fields.Char(string='ZK ID', required=True)
     emp_code = fields.Char(string='Employee Code', required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', compute='_compute_employee_id', store=True)
+    company_id = fields.Many2one('res.company', related='employee_id.company_id', string='Company', store=True)
     dept_code = fields.Char(string='Department Code', required=True)
     department_id = fields.Many2one('zk.department', string='Department', compute='_compute_department_id', store=True)
     att_date = fields.Date(string='Attendance Date', required=True)

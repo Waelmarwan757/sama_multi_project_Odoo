@@ -6,8 +6,10 @@ class HrTransfer(models.Model):
     _inherit = ['mail.thread']
     _description = 'HR Transfer'
     _rec_name = 'employee_id'
+    _check_company_auto = True
 
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True, tracking=True)
+    company_id = fields.Many2one('res.company', related='employee_id.company_id', string='Company', store=True)
     date = fields.Date(string='Transfer Date', required=True, default=fields.Date.context_today, tracking=True)
     current_location_id = fields.Many2one('hr.work.location', related='employee_id.work_location_id', string='From Location', store=True, depends=['employee_id'])
     current_parent_id = fields.Many2one('hr.employee', related='employee_id.parent_id', store=True, string='Current Manager', depends=['employee_id'])

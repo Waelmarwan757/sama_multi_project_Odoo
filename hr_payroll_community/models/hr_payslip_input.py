@@ -30,11 +30,16 @@ class HrPayslipInput(models.Model):
     _name = 'hr.payslip.input'
     _description = 'Payslip Input'
     _order = 'payslip_id, sequence'
+    _check_company_auto = True
+
 
     name = fields.Char(string='Description', required=True, help='Name of the input')
     payslip_id = fields.Many2one('hr.payslip', string='Pay Slip',
                                  required=True, help='Payslip related to the input',
                                  ondelete='cascade',  index=True)
+    company_id = fields.Many2one('res.company', string='Company', related='payslip_id.company_id',
+                                 store=True, readonly=True,
+                                 help="Company related to the payslip")
     sequence = fields.Integer(required=True, index=True, default=10,
                               string="Sequence", help='Sequence to identify the record')
     code = fields.Char(required=True, string='Code',
