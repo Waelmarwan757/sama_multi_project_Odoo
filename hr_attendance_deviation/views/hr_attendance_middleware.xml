@@ -5,8 +5,10 @@
         <field name="arch" type="xml">
             <list decoration-danger="late_check_in_state == 'late' or early_check_out_state == 'early'">
                 <header>
-                    <button type="object" name="action_confirm_late_check_in" string="Confirm Late Check-In"/>
-                    <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out"/>
+                    <button type="object" name="action_confirm_late_check_in" string="Confirm Late Check-In" confirm="Are you sure you want to confirm this late check-in?" class="btn-primary"/>
+                    <button type="object" name="action_cancel_late_check_in_approval" string="Cancel Late Check-In Approval" confirm="Are you sure you want to cancel this late check-in approval?" class="btn-danger"/>
+                    <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out" confirm="Are you sure you want to confirm this early check-out?" class="btn-primary"/>
+                    <button type="object" name="action_cancel_early_check_out_approval" string="Cancel Early Check-Out Approval" confirm="Are you sure you want to cancel this early check-out approval?" class="btn-danger"/>
                 </header>
                 <field name="employee_id"/>
                 <field name="date"/>
