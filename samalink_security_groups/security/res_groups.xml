@@ -72,7 +72,6 @@
             ]" />
             <field name="whitelisted_menu_ids" eval="[
                 (4, ref('menu_hr_leave_waiting_2nd_approve')),
-                (4, ref('hr_attendance.menu_hr_attendance_view_attendances')),
                 (4, ref('hr_payroll_community.menu_department_tree')),
                 (4, ref('hr_payroll_community.menu_hr_payslip_run')),
                 (4, ref('hr_payroll_community.menu_hr_payroll_community_configuration')),
