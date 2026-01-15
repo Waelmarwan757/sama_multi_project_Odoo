@@ -11,7 +11,7 @@
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
         'data/ir_cron.xml',
-        'views/menu.xml',
+        # 'views/menu.xml', # Because menu_hr_attendance_root is deleted
         'wizard/zk_attendance_period.xml',
         'views/zk_api.xml',
         'views/zk_department.xml',
