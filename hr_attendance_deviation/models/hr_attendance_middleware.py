@@ -483,8 +483,9 @@ class HrAttendanceMiddleware(models.Model):
             vals = {
                 'late_check_in_approved': False,
             }
+            late_check_in_hours = record.force_late_check_in or record.late_check_in
             record.late_check_in_state = 'late'
-            record.message_post(body=_("Cancelling late check-in approval with value: %s hours." % vals['late_check_in']))
+            record.message_post(body=_("Cancelling late check-in approval with value: %s hours." % late_check_in_hours))
             record.hr_attendance_id.write(vals)
 
     def action_confirm_early_check_out(self):
@@ -502,8 +503,9 @@ class HrAttendanceMiddleware(models.Model):
             vals = {
                 'early_check_out_approved': False,
             }
+            early_check_out_hours = record.force_early_check_out or record.early_check_out
             record.early_check_out_state = 'early'
-            record.message_post(body=_("Cancelling early check-out approval with value: %s hours." % vals['early_check_out']))
+            record.message_post(body=_("Cancelling early check-out approval with value: %s hours." % early_check_out_hours))
             record.hr_attendance_id.write(vals)
 
     def _get_forced_values(self):
