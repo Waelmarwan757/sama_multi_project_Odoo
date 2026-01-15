@@ -9,6 +9,7 @@
     'depends': ['hr_attendance'],
     'data': [
         'security/ir.model.access.csv',
+        'security/ir_rule.xml',
         'data/ir_cron.xml',
         'views/menu.xml',
         'wizard/zk_attendance_period.xml',

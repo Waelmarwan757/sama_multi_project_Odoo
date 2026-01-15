@@ -9,6 +9,7 @@
     'depends': ['hr_attendance', 'hr_work_entry', 'hr_payroll_community', 'hr_contract', 'hr_zk_api_attendance'],
     'data': [
         'security/ir_groups.xml',
+        'security/ir_rule.xml',
         'security/ir.model.access.csv',
         'data/hr_salary_rule.xml',
         'views/hr_attendance.xml',

@@ -1,4 +1,10 @@
 <odoo>
+    <record id="hr_incentive_comp_rule" model="ir.rule">
+        <field name="name">Incentive multi-company</field>
+        <field name="model_id" ref="model_hr_incentive"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]</field>
+    </record>
+
     <record id="hr_incentive_officer_rule_team" model="ir.rule">
         <field name="name">hr.incentive (Team Only)</field>
         <field name="model_id" ref="model_hr_incentive"/>

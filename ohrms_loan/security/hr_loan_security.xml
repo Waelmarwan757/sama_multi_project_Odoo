@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <!-- Multi-company rule on the 'hr_loan' model -->
-        <record id="hr_loan_rule_company" model="ir.rule">
-            <field name="name">Loan Request Multi Company</field>
+        <record id="hr_loan_comp_rule" model="ir.rule">
+            <field name="name">Loan multi-company</field>
             <field name="model_id" ref="model_hr_loan"/>
-            <field eval="True" name="global"/>
-            <field name="domain_force">
-                ['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]
-            </field>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]</field>
         </record>
+
         <!-- Rule granting access to HR users to modify loan forms -->
         <record id="hr_loan_rule_officer" model="ir.rule">
             <field name="name">Loan Officer (Clear User Own Only)</field>
