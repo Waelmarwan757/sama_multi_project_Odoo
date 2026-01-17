@@ -1,7 +1,7 @@
 from collections import defaultdict
 import logging
 from datetime import datetime, time, timedelta
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, Command
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -104,3 +104,38 @@ class HrEmployee(models.Model):
         action['domain'] = [('employee_id', '=', self.id)]
         action['context'] = {'default_employee_id': self.id}
         return action
+
+    def action_add_data_from_job_position(self):
+        self.ensure_one()
+        if not self.job_id:
+            raise UserError(f"This employee {self.name} does not have a job position assigned.")
+        job = self.job_id
+        existing_resume_lines = self.resume_line_ids.filtered(lambda line: line.name == job.name)
+        vals = {}
+        if not existing_resume_lines:
+            resume_line_ids = Command.create({
+                'name': job.name,
+                'date_start': fields.Date.today(),
+                'date_end': fields.Date.today(),
+                'description': job.description,
+            })
+
+            vals.update({
+                'resume_line_ids': [resume_line_ids],
+            })
+        existing_employee_skills = self.employee_skill_ids.mapped('skill_id')
+        job_skills_to_add = job.skill_ids.filtered(lambda skill: skill not in existing_employee_skills)
+        for skill in job_skills_to_add:
+            skill_type_id = skill.skill_type_id
+            default_skill_level = skill_type_id.skill_level_ids.filtered(lambda level: level.default_level)
+            if default_skill_level:
+                vals.setdefault('employee_skill_ids', []).append(Command.create({
+                    'skill_id': skill.id,
+                    'skill_level_id': default_skill_level.id,
+                    'skill_type_id': skill_type_id.id,
+                }))
+        self.write(vals)
+
+    def action_bulk_add_data_from_job_position(self):
+        for employee in self:
+            employee.action_add_data_from_job_position()

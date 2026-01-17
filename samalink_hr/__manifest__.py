@@ -14,6 +14,7 @@
         'views/hr_attendance.xml',
         'views/hr_work_entry.xml',
         'views/hr_absent_entry.xml',
+        'views/hr_job.xml',
     ],
     'installable': True,
     'application': False,
