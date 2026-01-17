@@ -59,5 +59,5 @@ class HrPayslip(models.Model):
         for line in self.input_line_ids:
             if line.loan_line_ids:
                 line.loan_line_ids.write({'paid': True})
-                line.loan_line_ids.loan_id._compute_total_amount()
+                line.loan_line_ids.loan_id.check_fully_paid()
         return super(HrPayslip, self).action_payslip_done()

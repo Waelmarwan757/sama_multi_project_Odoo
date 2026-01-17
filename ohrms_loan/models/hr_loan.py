@@ -99,17 +99,23 @@ class HrLoan(models.Model):
                                           "paid towards the loan.", tracking=True)
     state = fields.Selection(
         [('draft', 'Draft'), ('waiting_approval_1', 'Submitted'),
-         ('approve', 'Approved'), ('refuse', 'Refused'), ('cancel', 'Canceled'),
+         ('approve', 'Approved'), ('refuse', 'Refused'), ('cancel', 'Canceled'), ('paid', 'Fully Paid')
          ], string="State", default='draft', help="The current state of the "
                                                   "loan request.", copy=False, tracking=True)
     work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
     active = fields.Boolean(default=True, tracking=True)
     deleted = fields.Boolean(default=False)
 
+    def check_fully_paid(self):
+        self._compute_total_amount()
+        to_archive = self.filtered(lambda r: r.state == 'approve' and r.balance_amount == 0)
+        to_archive.write({'state': 'paid'})
+        to_archive.action_archive()
+
     def action_archive(self):
         for record in self:
-            if record.state not in ['draft', 'cancel']:
-                raise ValidationError("You cannot delete a loan which is not in draft or cancelled state.")
+            if record.state not in ['draft', 'cancel', 'paid']:
+                raise ValidationError("You cannot delete a loan which is not in draft, cancelled, or fully paid state.")
         return super(HrLoan, self).action_archive()
 
     def action_unarchive(self):
