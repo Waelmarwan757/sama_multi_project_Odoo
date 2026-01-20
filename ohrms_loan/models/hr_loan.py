@@ -112,6 +112,10 @@ class HrLoan(models.Model):
         to_archive.write({'state': 'paid'})
         to_archive.action_archive()
 
+    def action_mark_as_paid(self):
+        self.loan_lines.filtered(lambda line: not line.paid).write({'paid': True})
+        self.check_fully_paid()
+
     def action_archive(self):
         for record in self:
             if record.state not in ['draft', 'cancel', 'paid']:
