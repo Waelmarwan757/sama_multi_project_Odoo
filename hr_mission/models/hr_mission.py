@@ -2,6 +2,8 @@ import logging
 from datetime import datetime, time, timedelta
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+from odoo.addons.hr_attendance_deviation.tools import Converter
+
 
 _logger = logging.getLogger(__name__)
 
@@ -83,26 +85,41 @@ class HrMission(models.Model):
         self.write({'state': 'cancelled'})
 
     def _create_attendance_records(self):
-        attendance_work_type = self.env.ref('hr_work_entry.work_entry_type_attendance')
         vals_list = []
         for record in self:
             current_date = record.start_date
             while current_date <= record.end_date:
-                date_midnight = datetime.combine(current_date, time.min)
-                end_of_date = datetime.combine(current_date, time.max)
-                work_entry = self.env['hr.work.entry'].search([
-                    ('employee_id', '=', record.employee_id.id),
-                    ('date_start', '>=', date_midnight),
-                    ('date_stop', '<=', end_of_date),
-                    ('work_entry_type_id', '=', attendance_work_type.id)
-                ])
-                if not work_entry:
-                    raise ValidationError(f"No attendance work entry found for {record.employee_id.name} on {current_date}. Please ensure attendance is recorded before approving the mission.")
-                vals_list.append({
-                    'employee_id': record.employee_id.id,
-                    'check_in': work_entry.date_start,
-                    'check_out': work_entry.date_stop,
-                    'mission_id': record.id
-                })
+                vals = record._get_shift_start_end(current_date)
+                if vals:
+                    vals_list.append(vals)
                 current_date += timedelta(days=1)
+        if not vals_list:
+            raise ValidationError("No attendance shifts found for the mission period. Please ensure attendance shifts are recorded before approving the mission.")
         self.env['hr.attendance'].create(vals_list)
+
+    def _get_shift_start_end(self, date):
+        contract = self.employee_id.contract_id
+        attendances = contract.resource_calendar_id.attendance_ids
+        dayofweek = str(date.weekday())
+        dayofweek_attendance = attendances.filtered(lambda at: str(at.dayofweek) == dayofweek)
+        shift_start_datetime, shift_end_datetime = self._get_shift_datetimes(dayofweek_attendance, date)
+        if dayofweek_attendance:
+            return{
+                'employee_id': self.employee_id.id,
+                'check_in': shift_start_datetime,
+                'check_out': shift_end_datetime,
+                'mission_id': self.id
+            }
+
+    def _get_shift_datetimes(self, shift, date):
+        shift_hour_from_time = self._convert_float_to_time(shift.hour_from)
+        shift_hour_to_time = self._convert_float_to_time(shift.hour_to)
+        shift_start_datetime = self._convert_to_gmt_naive(date, shift_hour_from_time)
+        shift_end_datetime = self._convert_to_gmt_naive(date, shift_hour_to_time)
+        return shift_start_datetime, shift_end_datetime
+
+    def _convert_float_to_time(self, float_time):
+        return Converter.float_to_time_obj(float_time)
+
+    def _convert_to_gmt_naive(self, date_obj, time_obj):
+        return Converter.date_time_to_gmt_naive(date_obj, time_obj)
