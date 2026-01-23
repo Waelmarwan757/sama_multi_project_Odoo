@@ -9,6 +9,8 @@ _logger = logging.getLogger(__name__)
 class ZkEmployee(models.Model):
     _name = 'zk.employee'
     _description = 'ZK Employee'
+    _rec_name = 'full_name'
+    _rec_names_search = ['full_name', 'emp_code', 'zk_id', 'employee_id']
 
     zk_id = fields.Char(string='Employee ID', required=True)
     emp_code = fields.Char(string='Employee Code', required=True)

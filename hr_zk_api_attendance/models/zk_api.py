@@ -80,10 +80,10 @@ class ZkApi(models.Model):
             }
         }
 
-    def action_sync_attendance(self, cron=False, start_date=None, end_date=None):
+    def action_sync_attendance(self, cron=False, start_date=None, end_date=None, departments=None, employees=None):
         """Function to set attendance from ZK API"""
         headers = self._get_headers()
-        attendance_ids = self.env['zk.attendance'].sync_attendance(headers, self.url, start_date=start_date, end_date=end_date)
+        attendance_ids = self.env['zk.attendance'].sync_attendance(headers, self.url, start_date=start_date, end_date=end_date, departments=departments, employees=employees)
         if cron:
             return attendance_ids
         return {

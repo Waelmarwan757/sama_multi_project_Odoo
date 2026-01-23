@@ -43,13 +43,14 @@ class ZkAttendance(models.Model):
             record.department_id = mapped_departments.get(record.dept_code, False)
 
     @api.model
-    def _get_attendance_report(self, headers, api_url, start_date=None, end_date=None):
+    def _get_attendance_report(self, headers, api_url, start_date=None, end_date=None, departments=None, employees=None):
         today = date.today()
         yesterday = today - timedelta(days=1)
         start_date = start_date or yesterday.strftime('%Y-%m-%d')
         end_date = end_date or today.strftime('%Y-%m-%d')
-        departments = ','.join(str(dep.zk_id) for dep in self.env['zk.department'].search([]))
-        endpoint = f"/att/api/transactionReport/?page=1&page_size=200&start_date={start_date}&end_date={end_date}&departments={quote(departments)}&areas=-1&groups=-1&employees=-1"
+        zk_departments = ','.join(str(dep.zk_id) for dep in (departments or self.env['zk.department'].search([])))
+        zk_employees = ','.join(str(emp.zk_id) for emp in employees) or '-1'
+        endpoint = f"/att/api/transactionReport/?page=1&page_size=200&start_date={start_date}&end_date={end_date}&departments={quote(zk_departments)}&areas=-1&groups=-1&employees={quote(zk_employees)}"
         url = f"{api_url}{endpoint}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Raise an error for bad responses
@@ -67,10 +68,10 @@ class ZkAttendance(models.Model):
 
 
     @api.model
-    def sync_attendance(self, headers, api_url, start_date=None, end_date=None):
+    def sync_attendance(self, headers, api_url, start_date=None, end_date=None, departments=None, employees=None):
         """Function to sync attendance from ZK API"""
         try:
-            attendance_data = self._get_attendance_report(headers, api_url, start_date, end_date)
+            attendance_data = self._get_attendance_report(headers, api_url, start_date, end_date, departments, employees)
         except requests.RequestException as e:
             _logger.error(f"Error fetching attendance data: {e}")
             raise UserError(_("Failed to fetch attendance data from ZK API."))

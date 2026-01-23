@@ -23,6 +23,14 @@ class ZKAttendancePeriodWizard(models.TransientModel):
 
     start_date = fields.Date(string='Start Date', required=True)
     end_date = fields.Date(string='End Date', required=True)
+    department_ids = fields.Many2many(
+        'zk.department',
+        string='Departments'
+    )
+    employee_ids = fields.Many2many(
+        'zk.employee',
+        string='Employees'
+    )
     create_hr_attendance = fields.Boolean(
         string='Create HR Attendance',
         default=False
@@ -61,6 +69,8 @@ class ZKAttendancePeriodWizard(models.TransientModel):
         zk_api.action_sync_attendance(
             start_date=self.start_date,
             end_date=self.end_date,
+            departments=self.department_ids,
+            employees=self.employee_ids,
             cron=True
         )
         if self.create_hr_attendance:

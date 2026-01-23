@@ -7,6 +7,9 @@
                 <group>
                     <group>
                         <field name="date_period"/>
+                        <field name="department_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All departments"/>
+                        <field name="employee_ids" invisible="not department_ids" widget="many2many_tags" options="{'no_create': True}" domain="[('department_id', 'in', department_ids)]" placeholder="All department employees"/>
+                        <field name="employee_ids" invisible="department_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All employees"/>
                         <field name="create_hr_attendance"/>
                     </group>
                     <group>
