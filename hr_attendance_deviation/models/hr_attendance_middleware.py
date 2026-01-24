@@ -82,6 +82,9 @@ class HrAttendanceMiddleware(models.Model):
     force_late_check_in = fields.Float(string='Force Late In', help='Manually set late check-in hours to override computed value.', tracking=True)
     force_early_check_out = fields.Float(string='Force Early Out', help='Manually set early check-out hours to override computed value.', tracking=True)
 
+    def action_recheck_has_late_early_request(self):
+        self._compute_has_late_early_request()
+
     @api.depends('employee_id', 'date', 'late_check_in_state', 'early_check_out_state')
     def _compute_has_late_early_request(self):
         for record in self:
@@ -472,7 +475,7 @@ class HrAttendanceMiddleware(models.Model):
         for record in self.filtered(lambda r: r.late_check_in_state == 'late'):
             vals = {
                 'late_check_in': record.force_late_check_in or record.late_check_in,
-                'late_check_in_approved': True,
+                'late_check_in_approved': not record.has_late_early_request,
             }
             record.late_check_in_state = 'approved'
             record.message_post(body=_("Confirming late check-in with value: %s hours." % vals['late_check_in']))
@@ -492,7 +495,7 @@ class HrAttendanceMiddleware(models.Model):
         for record in self.filtered(lambda r: r.early_check_out_state == 'early'):
             vals = {
                 'early_check_out': record.force_early_check_out or record.early_check_out,
-                'early_check_out_approved': True,
+                'early_check_out_approved': not record.has_late_early_request,
             }
             record.early_check_out_state = 'approved'
             record.message_post(body=_("Confirming early check-out with value: %s hours." % vals['early_check_out']))

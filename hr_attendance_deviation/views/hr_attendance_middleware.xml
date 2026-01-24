@@ -9,6 +9,7 @@
                     <button type="object" name="action_cancel_late_check_in_approval" string="Cancel Late Check-In Approval" confirm="Are you sure you want to cancel this late check-in approval?" class="btn-danger"/>
                     <button type="object" name="action_confirm_early_check_out" string="Confirm Early Check-Out" confirm="Are you sure you want to confirm this early check-out?" class="btn-primary"/>
                     <button type="object" name="action_cancel_early_check_out_approval" string="Cancel Early Check-Out Approval" confirm="Are you sure you want to cancel this early check-out approval?" class="btn-danger"/>
+                    <button type="object" name="action_recheck_has_late_early_request" string="Recheck Late/Early Requests" class="btn-secondary"/>
                 </header>
                 <field name="employee_id"/>
                 <field name="date"/>
@@ -173,6 +174,14 @@
         <field name="context">{'search_default_no_late_early_request_filter': 1, 'search_default_group_by_state': 1, 'search_default_group_by_date': 1}</field>
     </record>
 
+    <record id="action_hr_attendance_middleware_no_late_early_request" model="ir.actions.act_window">
+        <field name="name">Attendance Middleware No Late/Early Permission</field>
+        <field name="res_model">hr.attendance.middleware</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('has_late_early_request', '=', False), ('late_check_in_state', '=', 'late'), ('early_check_out_state', '=', 'early')]</field>
+        <field name="context">{'search_default_no_late_early_request_filter': 1, 'search_default_group_by_state': 1, 'search_default_group_by_date': 1}</field>
+    </record>
+
     <data noupdate="1">
         <menuitem id="menu_hr_attendance_middleware_root"
                     name="Attendance Middleware"
@@ -192,5 +201,12 @@
                     action="action_hr_attendance_middleware_team"
                     groups="hr_attendance_deviation.group_hr_attendance_middleware_user"
                     sequence="20"/>
+
+        <menuitem id="menu_hr_attendance_middleware_no_late_early_request"
+                    name="No Late/Early Permission"
+                    parent="menu_hr_attendance_middleware_root"
+                    action="action_hr_attendance_middleware_no_late_early_request"
+                    groups="hr_attendance_deviation.group_hr_attendance_middleware_user"
+                    sequence="30"/>
     </data>
 </odoo>
