@@ -157,7 +157,7 @@
                         <field name="work_location_id"/>
                     </group>
                     <notebook>
-                        <page string="Worked Days &amp; Inputs">
+                        <page string="Worked Days &amp; Inputs" invisible="1">
                             <separator string="Worked Days"/>
                             <field name="worked_days_line_ids"
                                    readonly="state != 'draft'">
@@ -235,7 +235,7 @@
                                 </form>
                             </field>
                         </page>
-                        <page string="Details By Salary Rule Category" groups="hr_payroll_community.group_hr_payroll_community_user">
+                        <page string="Details By Salary Rule Category" groups="hr_payroll_community.group_hr_payroll_community_user" invisible="1">
 
                             <field name="details_by_salary_rule_category_ids"
                                    context="{'search_default_category_id':1}"
@@ -249,7 +249,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Accounting Information" groups="hr_payroll_community.group_hr_payroll_community_user">
+                        <page string="Accounting Information" groups="hr_payroll_community.group_hr_payroll_community_user" invisible="1">
                             <group>
                                 <group string="Miscellaneous">
                                     <field name="company_id"
@@ -270,6 +270,7 @@
                                        readonly="state != 'draft'"/>
                             </div>
                         </page>
+                        <page string="Salary Slip Details" name="salary_slip_details"/>
                     </notebook>
                     <chatter/>
                 </sheet>

@@ -5,18 +5,16 @@
             <field name="model">hr.payslip</field>
             <field name="inherit_id" ref="hr_payroll_community.hr_payslip_view_form"/>
             <field name="arch" type="xml">
-                <notebook position="inside">
-                    <page name="hr_incentives" string="Incentives">
+                <page name="salary_slip_details" position="inside">
+                    <group string="Incentives">
                         <group>
-                            <group>
-                                <field name="bonus_amount"/>
-                            </group>
-                            <group>
-                                <field name="penalty_amount"/>
-                            </group>
+                            <field name="bonus_amount"/>
                         </group>
-                    </page>
-                </notebook>
+                        <group>
+                            <field name="penalty_amount"/>
+                        </group>
+                    </group>
+                </page>
             </field>
         </record>
     </data>
