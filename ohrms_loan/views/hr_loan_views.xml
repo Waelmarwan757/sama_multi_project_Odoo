@@ -38,7 +38,7 @@
                             invisible="state not in ['waiting_approval_1']"
                             groups="ohrms_loan.group_loan_officer"/>
                     <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft' or not id"/>
-                    <button name="action_mark_as_paid" type="object" string="Mark as Paid" invisible="state != 'paid'" groups="ohrms_loan.group_loan_officer"/>
+                    <button name="action_mark_as_paid" type="object" string="Mark as Paid" invisible="state == 'paid'" groups="ohrms_loan.group_loan_officer"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,waiting_approval_1,approve"/>
                 </header>
