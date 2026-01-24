@@ -42,6 +42,39 @@
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,waiting_approval_1,approve"/>
                 </header>
+                <field name="multi_request_warning_shown" invisible="1"/>
+                <div
+                    class="alert alert-warning oe_edit_only"
+                    role="alert"
+                    invisible="not multi_request_warning_shown"
+                >
+                    <p>
+                        <strong>Warning!</strong>
+                        The employee has already a pending or draft loan request.
+                    </p>
+                </div>
+                <field name="max_loan_amount_warning_shown" invisible="1"/>
+                <div
+                    class="alert alert-warning oe_edit_only"
+                    role="alert"
+                    invisible="not max_loan_amount_warning_shown"
+                >
+                    <p>
+                        <strong>Warning!</strong>
+                        The loan amount exceeds the maximum limit based on the employee's wage.
+                    </p>
+                </div>
+                <field name="date_restriction_warning_shown" invisible="1"/>
+                <div
+                    class="alert alert-warning oe_edit_only"
+                    role="alert"
+                    invisible="not date_restriction_warning_shown"
+                >
+                    <p>
+                        <strong>Warning!</strong>
+                        Loan requests are not allowed during this period.
+                    </p>
+                </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                     </div>

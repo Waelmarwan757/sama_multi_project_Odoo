@@ -105,6 +105,9 @@ class HrLoan(models.Model):
     work_location_id = fields.Many2one(related="employee_id.work_location_id", domain="[('address_id', '=', address_id)]")
     active = fields.Boolean(default=True, tracking=True)
     deleted = fields.Boolean(default=False)
+    multi_request_warning_shown = fields.Boolean(default=False, compute='_compute_check_pending_loan')
+    max_loan_amount_warning_shown = fields.Boolean(default=False, compute='_compute_check_max_loan_amount')
+    date_restriction_warning_shown = fields.Boolean(default=False, compute='_compute_check_date')
 
     def check_fully_paid(self):
         self._compute_total_amount()
@@ -128,35 +131,105 @@ class HrLoan(models.Model):
                 raise ValidationError("You cannot unarchive a deleted loan.")
         return super(HrLoan, self).action_unarchive()
 
-    @api.constrains('employee_id', 'loan_amount')
-    def _check_max_loan_amount(self):
-        is_admin = self.env.user.has_group('base.group_system')
+    @api.constrains('employee_id')
+    def _check_pending_loan(self):
+        loan_multi_request_restriction = self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_multi_request_restriction', default='none')
+        if loan_multi_request_restriction == 'block':
+            self.__check_has_pending_loan()
+
+    @api.depends('employee_id')
+    def _compute_check_pending_loan(self):
+        self.write({'multi_request_warning_shown': False})
+        loan_multi_request_restriction = self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_multi_request_restriction', default='none')
+        if loan_multi_request_restriction == 'warning':
+            self.__check_has_pending_loan(raise_error=False)
+
+    def __check_has_pending_loan(self, raise_error=True):
+        is_admin = self.env.user.has_group('ohrms_loan.group_loan_bypass_restrictions')
         if is_admin:
             return
         for loan in self:
-            max_loan = int(loan.employee_id.sudo().contract_id.wage) / 2
-            if not max_loan:
+            pending_loan_count = self.env['hr.loan'].search_count([
+                ('employee_id', '=', loan.employee_id.id),
+                ('state', '=', 'approve'),
+                ('balance_amount', '!=', 0),
+            ])
+            if pending_loan_count:
+                if raise_error:
+                    raise ValidationError(
+                        _("The Employee has already a pending installment"))
+                else:
+                    loan.multi_request_warning_shown = True
+                    continue
+            draft_loan_count = self.env['hr.loan'].search_count([
+                ('employee_id', '=', loan.employee_id.id),
+                ('state', '=', 'draft')
+            ])
+            if draft_loan_count > 1:
+                if raise_error:
+                    raise ValidationError(
+                        _("The Employee has already a draft loan request"))
+                else:
+                    loan.multi_request_warning_shown = True
+                    continue
+
+    @api.constrains('employee_id', 'loan_amount')
+    def _check_max_loan_amount(self):
+        loan_allowed_wage_percentage_restriction = self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_allowed_wage_percentage_restriction', default='none')
+        if loan_allowed_wage_percentage_restriction == 'block':
+            self.__check_max_loan_amount()
+
+    @api.depends('employee_id', 'loan_amount')
+    def _compute_check_max_loan_amount(self):
+        self.write({'max_loan_amount_warning_shown': False})
+        loan_allowed_wage_percentage_restriction = self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_allowed_wage_percentage_restriction', default='none')
+        if loan_allowed_wage_percentage_restriction == 'warning':
+            self.__check_max_loan_amount(raise_error=False)
+
+    def __check_max_loan_amount(self, raise_error=True):
+        is_admin = self.env.user.has_group('ohrms_loan.group_loan_bypass_restrictions')
+        if is_admin:
+            return
+        loan_max_wage_percentage = float(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_max_wage_percentage', default=0)) / 100
+        for loan in self:
+            max_loan = int(loan.employee_id.sudo().contract_id.wage) * (loan_max_wage_percentage or 1)
+            if not max_loan and raise_error:
                 raise ValidationError(
                     _("The employee does not have a valid contract "
                       "with a defined wage."))
-            elif loan.loan_amount > max_loan:
+            elif loan.loan_amount > max_loan and raise_error:
                 raise ValidationError(
                     _("The loan amount exceeds the maximum limit of %s "
                       "for the employee.") % max_loan)
+            else:
+                loan.max_loan_amount_warning_shown = loan.loan_amount > max_loan
 
     @api.constrains('date')
     def _check_date(self):
-        is_admin = self.env.user.has_group('base.group_system')
+        loan_allowed_dates_restrection = self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_allowed_dates_restrection', default='none')
+        if loan_allowed_dates_restrection == 'block':
+            self.__check_date()
+
+    def _compute_check_date(self):
+        self.write({'date_restriction_warning_shown': False})
+        loan_allowed_dates_restrection = self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_allowed_dates_restrection', default='none')
+        if loan_allowed_dates_restrection == 'warning':
+            self.write({'date_restriction_warning_shown': self.__check_date(raise_error=False)})
+
+    def __check_date(self, raise_error=True):
+        is_admin = self.env.user.has_group('ohrms_loan.group_loan_bypass_restrictions')
         if is_admin:
             return
         today = fields.Date.today().day
         loan_after_day = int(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_after_month_day', default=10))
         loan_before_day = int(self.env['ir.config_parameter'].sudo().get_param('ohrms_loan.loan_before_month_day', default=20))
-        _logger.info("Today's date: %s", today)
         if today < loan_after_day or today > loan_before_day:
-            raise ValidationError(
-                _("You can only create loan request between "
-                  "%s to %s of the month.") % (loan_after_day, loan_before_day))
+            if raise_error:
+                raise ValidationError(
+                    _("You can only create loan request between "
+                      "%s to %s of the month.") % (loan_after_day, loan_before_day))
+            else:
+                return True
 
     def _compute_total_amount(self):
         """ Compute total loan amount,balance amount and total paid amount"""
@@ -175,21 +248,6 @@ class HrLoan(models.Model):
         """ Check whether any pending loan is for the employee and calculate
             the sequence
             :param values : Dictionary which contain fields and values"""
-        is_admin = self.env.user.has_group('base.group_system')
-        if not is_admin:
-            pending_loan_count = self.env['hr.loan'].search_count(
-                [('employee_id', '=', values['employee_id']),
-                 ('state', '=', 'approve'),
-                 ('balance_amount', '!=', 0)])
-            if pending_loan_count:
-                raise ValidationError(
-                    _("The Employee has already a pending installment"))
-            draft_loan_count = self.env['hr.loan'].search_count(
-                [('employee_id', '=', values['employee_id']),
-                 ('state', '=', 'draft')])
-            if draft_loan_count:
-                raise ValidationError(
-                    _("The Employee has already a draft loan request"))
         
         values['name'] = self.env['ir.sequence'].get('hr.loan.seq') or ' '
         return super(HrLoan, self).create(values)
