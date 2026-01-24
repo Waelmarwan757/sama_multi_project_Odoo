@@ -114,6 +114,8 @@
                             <field name="date_end" class="oe_inline"
                                    readonly="state != 'draft'"/>
                         </div>
+                        <field name="duration" readonly="1"/>
+                        <field name="rest_days_adjustment"/>
                         <field name="credit_note" readonly="state != 'draft'"/>
                     </group>
                     <separator string="Payslips"/>

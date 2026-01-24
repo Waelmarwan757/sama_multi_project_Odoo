@@ -110,6 +110,7 @@ class HrPayslip(models.Model):
     payslip_run_id = fields.Many2one('hr.payslip.run',
                                      string='Payslip Batches',
                                      copy=False, help="Choose Payslip Run")
+    rest_days_adjustment = fields.Integer(related="payslip_run_id.rest_days_adjustment", string='Rest Days Adjustment', help="Number of rest days to be adjusted in the payslip calculation", store=True, depends=['payslip_run_id'])
     payslip_count = fields.Integer(compute='_compute_payslip_count',
                                    string="Payslip Computation Details",
                                    help="Set Payslip Count")

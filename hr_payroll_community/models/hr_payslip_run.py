@@ -22,7 +22,7 @@
 #############################################################################
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from odoo import fields, models, _
+from odoo import fields, models, _, api
 
 
 class HrPayslipRun(models.Model):
@@ -51,6 +51,9 @@ class HrPayslipRun(models.Model):
                                (datetime.now() + relativedelta(months=+1, day=1,
                                                                days=-1)).date())
                            )
+    duration = fields.Integer(string='Duration (Days)', compute='_compute_duration',
+                            help="Duration in Days", store=True, readonly=True)
+    rest_days_adjustment = fields.Integer(string='Rest Days Adjustment', help="Number of rest days to be adjusted in the payslip calculation",)
     credit_note = fields.Boolean(string='Credit Note',
                                  help="If its checked, indicates that all"
                                       "payslips generated from here are refund"
@@ -59,6 +62,14 @@ class HrPayslipRun(models.Model):
     payslip_count = fields.Integer(compute='_compute_payslip_count',
                                    string="Payslip Computation Details",
                                    help="Set Payslip Count")
+
+    @api.depends('date_start', 'date_end')
+    def _compute_duration(self):
+        for record in self:
+            delta = 0
+            if record.date_start and record.date_end:
+                delta = (record.date_end - record.date_start).days + 1
+            record.duration = delta
 
     def _compute_payslip_count(self):
         """Function to compute payslip count"""
