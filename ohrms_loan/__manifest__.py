@@ -44,6 +44,7 @@
         'views/hr_employee_views.xml',
         'views/hr_loan_line.xml',
         'views/res_config_settings.xml',
+        'wizard/hr_loan_pay_amount.xml',
     ],
     'demo': ['data/hr_salary_rule_demo.xml',
              'data/hr_rule_input_demo.xml', ],

@@ -27,6 +27,7 @@ class HrLoanLine(models.Model):
     """ Model for managing details of loan request installments"""
     _name = "hr.loan.line"
     _description = "Installment Line"
+    _order = "paid asc, date asc"
 
     date = fields.Date(string="Payment Date", required=True,
                        help="Date of the payment")

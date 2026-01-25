@@ -119,6 +119,18 @@ class HrLoan(models.Model):
         self.loan_lines.filtered(lambda line: not line.paid).write({'paid': True})
         self.check_fully_paid()
 
+    def action_pay_amount(self):
+        return {
+            'name': _('Pay Loan Amount'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'hr.loan.pay.amount.wizard',
+            'target': 'new',
+            'context': {
+                'default_loan_id': self.id,
+            }
+        }
+
     def action_archive(self):
         for record in self:
             if record.state not in ['draft', 'cancel', 'paid']:

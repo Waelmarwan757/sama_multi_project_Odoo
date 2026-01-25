@@ -38,7 +38,8 @@
                             invisible="state not in ['waiting_approval_1']"
                             groups="ohrms_loan.group_loan_officer"/>
                     <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft' or not id"/>
-                    <button name="action_mark_as_paid" type="object" string="Mark as Paid" invisible="state == 'paid'" groups="ohrms_loan.group_loan_officer"/>
+                    <button name="action_mark_as_paid" type="object" string="Mark as Fully Paid" invisible="state != 'approve'" groups="ohrms_loan.group_loan_officer" confirm="Are you sure you want to mark this loan as fully paid?"/>
+                    <button name="action_pay_amount" type="object" string="Pay Amount" invisible="state != 'approve'" groups="ohrms_loan.group_loan_officer"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,waiting_approval_1,approve"/>
                 </header>
@@ -102,11 +103,10 @@
                     <notebook>
                         <page string="Installments">
                             <field name="loan_lines">
-                                <list string="Installments" editable="bottom">
+                                <list string="Installments" editable="bottom" create="false" delete="false" edit="false">
                                     <field name="date"/>
                                     <field name="amount"/>
-                                    <field name="paid"
-                                           column_invisible="True"/>
+                                    <field name="paid"/>
                                 </list>
                             </field>
                             <group class="oe_subtotal_footer oe_right"
