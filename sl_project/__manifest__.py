@@ -8,6 +8,8 @@
     'category': 'Project',
     'depends': ['base', 'project'],
     'data': [
+        'security/ir_rule.xml',
+        'views/project_project.xml',
         'views/project_task.xml',
     ],
     'installable': True,
