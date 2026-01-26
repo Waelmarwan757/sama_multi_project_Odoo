@@ -15,7 +15,7 @@
         <field name="name">hr.loan.line.payslip.form</field>
         <field name="model">hr.loan.line</field>
         <field name="arch" type="xml">
-            <form string="Loan Line" create="false" delete="false" edit="false">
+            <form string="Loan Line" create="false" delete="false">
                 <group>
                     <field name="date"/>
                     <field name="amount"/>
