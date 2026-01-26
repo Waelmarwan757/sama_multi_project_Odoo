@@ -101,10 +101,11 @@
         <field name="view_id" ref="view_hr_incentives_payslip_list"/>
         <field name="domain">[('employee_id', '=', False)]</field>
     </record>
-
-    <menuitem id="menu_hr_incentives_root" name="Incentives"
-              sequence="20"
-              parent="hr.menu_hr_root"
-              action="action_hr_incentives"
-              />
+    <data noupdate="1">
+        <menuitem id="menu_hr_incentives_root" name="Incentives"
+                  sequence="20"
+                  parent="hr.menu_hr_root"
+                  action="action_hr_incentives"
+                  />
+    </data>
 </odoo>

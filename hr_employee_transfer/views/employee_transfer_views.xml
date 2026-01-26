@@ -119,10 +119,12 @@
     </record>
 
     <!-- Employee Transfer Menu -->
-    <menuitem id="employee_transfer_menu_create_transfer"
-              name="Transfers"
-              sequence="10"
-              action="employee_transfer_action"
-              groups="hr.group_hr_manager"
-              web_icon="hr_employee_transfer,static/description/icon.png"/>
+    <data noupdate="1">
+        <menuitem id="employee_transfer_menu_create_transfer"
+                  name="Transfers"
+                  sequence="10"
+                  action="employee_transfer_action"
+                  groups="hr.group_hr_manager"
+                  web_icon="hr_employee_transfer,static/description/icon.png"/>
+    </data>
 </odoo>

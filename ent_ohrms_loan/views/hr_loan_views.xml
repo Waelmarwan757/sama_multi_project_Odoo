@@ -103,19 +103,21 @@
         </field>
     </record>
     <!-- Menu records for managing menus -->
-    <menuitem
-            id="hr_loan_menu_for_loan_and_advances"
-            name="Loans &amp; Advances"
-            parent="hr.menu_hr_root"
-            sequence="20"/>
-    <menuitem
-            id="hr_loan_menu_for_loan"
-            name="Loan"
-            parent = "hr_loan_menu_for_loan_and_advances"
-            sequence="1"/>
-    <menuitem
-            id="hr_loan_menu_creates_request_for_loan"
-            name="Request for Loan"
-            parent="hr_loan_menu_for_loan"
-            action="hr_loan_action"/>
+    <data noupdate="1">
+        <menuitem
+                id="hr_loan_menu_for_loan_and_advances"
+                name="Loans &amp; Advances"
+                parent="hr.menu_hr_root"
+                sequence="20"/>
+        <menuitem
+                id="hr_loan_menu_for_loan"
+                name="Loan"
+                parent = "hr_loan_menu_for_loan_and_advances"
+                sequence="1"/>
+        <menuitem
+                id="hr_loan_menu_creates_request_for_loan"
+                name="Request for Loan"
+                parent="hr_loan_menu_for_loan"
+                action="hr_loan_action"/>
+    </data>
 </odoo>
