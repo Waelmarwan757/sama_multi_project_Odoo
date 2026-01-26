@@ -180,14 +180,16 @@
         <field name="view_id" eval="hr_loan_view_tree"/>
     </record>
     <!--Loan Menus-->
-    <menuitem id="hr_loan_menu_root" name="Loans &amp; Advances"
-              parent="hr.menu_hr_root"
-              sequence="20"/>
-    <menuitem id="hr_loan_menu" name="Loan"
-              parent="hr_loan_menu_root"
-              sequence="1"/>
-    <menuitem id="hr_loan_menu_requests"
-              name="Request for Loan"
-              parent="hr_loan_menu_root"
-              action="hr_loan_action"/>
+    <data noupdate="1">
+        <menuitem id="hr_loan_menu_root" name="Loans &amp; Advances"
+                  parent="hr.menu_hr_root"
+                  sequence="20"/>
+        <menuitem id="hr_loan_menu" name="Loan"
+                  parent="hr_loan_menu_root"
+                  sequence="1"/>
+        <menuitem id="hr_loan_menu_requests"
+                  name="Request for Loan"
+                  parent="hr_loan_menu_root"
+                  action="hr_loan_action"/>
+    </data>
 </odoo>

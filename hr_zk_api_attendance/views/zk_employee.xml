@@ -58,5 +58,7 @@
     </record>
 
     <!-- Menu for zk.employee -->
-    <menuitem id="menu_zk_employee" name="Employees" parent="menu_zk_api_root" action="action_zk_employee"/>
+    <data noupdate="1">
+        <menuitem id="menu_zk_employee" name="Employees" parent="menu_zk_api_root" action="action_zk_employee"/>
+    </data>
 </odoo>

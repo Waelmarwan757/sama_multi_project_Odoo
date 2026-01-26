@@ -1,3 +1,5 @@
 <odoo>
-    <menuitem id="menu_zk_api_root" name="ZK API" parent="hr.menu_hr_root" sequence="10"/>
+    <data noupdate="1">
+        <menuitem id="menu_zk_api_root" name="ZK API" parent="hr.menu_hr_root" sequence="10"/>
+    </data>
 </odoo>

@@ -33,6 +33,7 @@
         <field name="res_model">zk.department</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <menuitem id="menu_zk_department_root" name="Departments" parent="menu_zk_api_root" action="action_zk_department"/>
+    <data noupdate="1">
+        <menuitem id="menu_zk_department_root" name="Departments" parent="menu_zk_api_root" action="action_zk_department"/>
+    </data>
 </odoo>
