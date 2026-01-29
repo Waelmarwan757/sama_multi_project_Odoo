@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
             <field name="user_ids" position="attributes">
-                <attribute name="domain">[('company_id', '=', company_id), ('share', '=', False), ('active', '=', True)]</attribute>
+                <attribute name="domain">['|', ('company_id', 'not in', company_ids), ('company_id', '=', company_id), ('share', '=', False), ('active', '=', True)]</attribute>
             </field>
             <field name="tag_ids" position="after">
                 <field name="company_ids" widget="many2many_tags" options="{'no_create': True}"/>
