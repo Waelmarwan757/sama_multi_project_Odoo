@@ -157,9 +157,9 @@
                         <field name="work_location_id"/>
                     </group>
                     <notebook>
-                        <page string="Worked Days &amp; Inputs" invisible="1">
-                            <separator string="Worked Days"/>
-                            <field name="worked_days_line_ids"
+                        <page string="Worked Days &amp; Inputs">
+                            <separator string="Worked Days" invisible="1"/>
+                            <field name="worked_days_line_ids" invisible="1"
                                    readonly="state != 'draft'">
                                 <list string="Worked Days" editable="bottom">
                                     <field name="name"/>
