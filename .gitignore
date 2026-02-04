@@ -1,3 +1,5 @@
-__pycache__
-*.zip
-muk_*
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.DS_Store
