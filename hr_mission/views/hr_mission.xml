@@ -36,7 +36,7 @@
                         <page string="Notes">
                             <group>
                                 <field name="note" readonly="state != 'confirmed'"/>
-                                <field name="hr_reason" groups="hr_mission.group_hr_mission_manager" required="state == 'confirmed'" readonly="state != 'confirmed'"/>
+                                <field name="hr_reason" groups="hr_mission.group_hr_mission_manager" readonly="state != 'confirmed'"/>
                             </group>
                         </page>
                         <page string="Attendance Records" groups="hr_mission.group_hr_mission_manager">
