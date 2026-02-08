@@ -92,7 +92,22 @@
         <field name="view_mode">list,form</field>
         <field name="context">{'search_default_filter_hr_pending': 1}</field>
     </record>
-    <data noupdate="1">
-        <menuitem id="menu_hr_mission" name="Missions" parent="hr.menu_hr_root" action="action_hr_mission" sequence="10"/>
-    </data>
+    <!-- Root Menu - This creates the separate app in sidebar -->
+    <menuitem id="menu_hr_mission_root" 
+              name="HR Missions" 
+              web_icon="hr_mission,static/description/icon.png"
+              sequence="30"/>
+    
+    <!-- Submenu under root -->
+    <menuitem id="menu_hr_mission_sub" 
+              name="Missions" 
+              parent="menu_hr_mission_root"
+              sequence="10"/>
+    
+    <!-- Action Menu Item -->
+    <menuitem id="menu_hr_mission" 
+              name="All Missions" 
+              parent="menu_hr_mission_sub" 
+              action="action_hr_mission" 
+              sequence="10"/>
 </odoo>
