@@ -32,16 +32,13 @@ class HrMission(models.Model):
         ('other', 'Other')
     ], string='Mission Type', required=True, tracking=True)
     note = fields.Text(string='Additional Notes', tracking=True)
-    manager_reason = fields.Text(string='Reason of Approval/Rejection (Manager)', tracking=True)
     hr_reason = fields.Text(string='Reason of Approval/Rejection (HR)', tracking=True)
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('confirmed', 'Submitted'),
-        ('manager_approved', 'Manager Approved'),
+        ('confirmed', 'Confirmed'),
         ('hr_approved', 'HR Approved'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled')
-    ], string='Status', default='draft', tracking=True)
+    ], string='Status', default='confirmed', tracking=True)
     attendance_ids = fields.One2many('hr.attendance', 'mission_id', string='Attendance Records', readonly=True)
 
     @api.constrains('employee_id')
@@ -49,26 +46,11 @@ class HrMission(models.Model):
         for record in self:
             existing_missions = self.search_count([
                 ('employee_id', '=', record.employee_id.id),
-                ('state', 'in', ['draft']),
+                ('state', '=', 'confirmed'),
                 ('id', '!=', record.id)
             ])
             if existing_missions:
                 raise ValidationError("There is already an ongoing mission request for this employee.")
-
-    def action_submit(self):
-        for record in self:
-            if record.employee_id.user_id != self.env.user:
-                raise ValidationError("You can only submit mission requests for your own employee record.")
-        self.write({'state': 'confirmed'})
-
-    def action_manager_approve(self):
-        is_hr = self.env.user.has_group('hr_mission.group_hr_mission_manager')
-        if not self.env.user.has_group('hr_mission.group_hr_mission_officer'):
-            raise ValidationError("You have to be a Manager to approve this request.")
-        for record in self:
-            if record.manager_id.user_id != self.env.user and not is_hr:
-                raise ValidationError("You can only approve mission requests for your own managed employee record.")
-        self.write({'state': 'manager_approved'})
 
     def action_hr_approve(self):
         if not self.env.user.has_group('hr_mission.group_hr_mission_manager'):
