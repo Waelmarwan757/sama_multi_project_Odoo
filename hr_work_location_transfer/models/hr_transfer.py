@@ -16,9 +16,9 @@ class HrTransfer(models.Model):
     current_leave_manager_id = fields.Many2one('res.users', related='employee_id.leave_manager_id', store=True, string='Current Leave Approver', depends=['employee_id'])
     current_attendance_manager_id = fields.Many2one('res.users', related='employee_id.attendance_manager_id', store=True, string='Current Attendance Approver', depends=['employee_id'])
     new_location_id = fields.Many2one('hr.work.location', string='To Location', required=True, tracking=True)
-    new_parent_id = fields.Many2one('hr.employee', string='New Manager', domain="[('work_location_id', '=', new_location_id)]", tracking=True)
-    new_leave_manager_id = fields.Many2one('res.users', string='New Leave Approver', domain="[('work_location_id', '=', new_location_id)]", tracking=True)
-    new_attendance_manager_id = fields.Many2one('res.users', string='New Attendance Approver', domain="[('work_location_id', '=', new_location_id)]", tracking=True)
+    new_parent_id = fields.Many2one('hr.employee', string='New Manager', tracking=True)
+    new_leave_manager_id = fields.Many2one('res.users', string='New Leave Approver', tracking=True)
+    new_attendance_manager_id = fields.Many2one('res.users', string='New Attendance Approver', tracking=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         # ('confirmed', 'Confirmed'),
