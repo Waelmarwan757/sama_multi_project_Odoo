@@ -7,14 +7,14 @@ class HrContract(models.Model):
     custody_ids = fields.One2many('hr.custody', 'contract_id', string='Custody Items')
 
     def write(self, vals):
-        if 'state' in vals and vals['state'] in ['close', 'cancel']:
+        if ('state' in vals and vals['state'] in ['close', 'cancel']) or ('active' in vals and not vals['active']):
             for contract in self:
                 uncleared = self.env['hr.custody'].search([
                     ('contract_id', '=', contract.id),
                     ('state', '=', 'received')
                 ])
                 if uncleared:
-                    raise ValidationError(_('Cannot close contract! The employee has %s uncleared custody items linked to this contract.') % len(uncleared))
+                    raise ValidationError(_('Cannot close or archive contract! The employee has %s uncleared custody items linked to this contract.') % len(uncleared))
         return super(HrContract, self).write(vals)
 
 class HrEmployee(models.Model):
