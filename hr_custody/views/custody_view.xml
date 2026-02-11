@@ -6,11 +6,36 @@
         <field name="name">hr.custody.type.list</field>
         <field name="model">hr.custody.type</field>
         <field name="arch" type="xml">
-            <list editable="bottom">
+            <list>
                 <field name="name"/>
                 <field name="code"/>
                 <field name="value"/>
             </list>
+        </field>
+    </record>
+
+    <record id="view_hr_custody_type_form" model="ir.ui.view">
+        <field name="name">hr.custody.type.form</field>
+        <field name="model">hr.custody.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="value"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
         </field>
     </record>
 
@@ -31,9 +56,13 @@
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
                     <group>
                         <group>
-                            <field name="name"/>
                             <field name="employee_id"/>
                             <field name="custody_type_id"/>
                             <field name="contract_id"/>

@@ -14,6 +14,7 @@
         'security/ir.model.access.csv',
         'views/custody_view.xml',
         'views/employee_view.xml',
+        'views/contract_view.xml',
     ],
     'installable': True,
     'application': True,

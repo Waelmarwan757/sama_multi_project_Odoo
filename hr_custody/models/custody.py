@@ -6,7 +6,16 @@ class HrCustody(models.Model):
     _description = 'Employee Custody'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Name', required=True)
+    name = fields.Char(string='Name', compute='_compute_name', store=True, readonly=True)
+
+    @api.depends('employee_id', 'custody_type_id')
+    def _compute_name(self):
+        for rec in self:
+            if rec.employee_id and rec.custody_type_id:
+                rec.name = f"{rec.custody_type_id.name} - {rec.employee_id.name}"
+            else:
+                rec.name = _('New Custody')
+
     custody_type_id = fields.Many2one('hr.custody.type', string='Custody Type')
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
     contract_id = fields.Many2one('hr.contract', string='Contract')
