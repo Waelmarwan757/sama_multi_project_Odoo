@@ -1,6 +1,6 @@
 {
     'name': 'Employee Personal Assets (Custody) Management',
-    'version': '16.0.1.0.0',
+    'version': '18.0.1.0.0',
     'summary': 'Manage employee custody items and link with offboarding',
     'description': """
         This module allows you to manage personal assets assigned to employees.
