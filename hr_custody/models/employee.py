@@ -16,7 +16,7 @@ class HrEmployee(models.Model):
         return {
             'name': 'Custody',
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'res_model': 'hr.custody',
             'domain': [('employee_id', '=', self.id)],
             'context': {'default_employee_id': self.id},

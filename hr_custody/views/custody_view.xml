@@ -3,21 +3,21 @@
 
     <!-- Custody Type Views -->
     <record id="view_hr_custody_type_tree" model="ir.ui.view">
-        <field name="name">hr.custody.type.tree</field>
+        <field name="name">hr.custody.type.list</field>
         <field name="model">hr.custody.type</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <list editable="bottom">
                 <field name="name"/>
                 <field name="code"/>
                 <field name="value"/>
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="action_hr_custody_type" model="ir.actions.act_window">
         <field name="name">Custody Types</field>
         <field name="res_model">hr.custody.type</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- Custody Views -->
@@ -27,7 +27,7 @@
         <field name="arch" type="xml">
             <form string="Custody">
                 <header>
-                    <button name="action_clear" string="Clear / Return" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'cleared')]}"/>
+                    <button name="action_clear" string="Clear / Return" type="object" class="oe_highlight" invisible="state == 'cleared'"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -40,7 +40,7 @@
                         </group>
                         <group>
                             <field name="date_receive"/>
-                            <field name="date_return" attrs="{'readonly': [('state', '=', 'received')]}"/>
+                            <field name="date_return" readonly="state == 'received'"/>
                             <field name="image" widget="image" class="oe_avatar"/>
                         </group>
                     </group>
@@ -55,17 +55,17 @@
     </record>
 
     <record id="view_hr_custody_tree" model="ir.ui.view">
-        <field name="name">hr.custody.tree</field>
+        <field name="name">hr.custody.list</field>
         <field name="model">hr.custody</field>
         <field name="arch" type="xml">
-            <tree decoration-info="state == 'received'" decoration-muted="state == 'cleared'">
+            <list decoration-info="state == 'received'" decoration-muted="state == 'cleared'">
                 <field name="name"/>
                 <field name="employee_id"/>
                 <field name="custody_type_id"/>
                 <field name="date_receive"/>
                 <field name="date_return"/>
                 <field name="state"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -91,7 +91,7 @@
     <record id="action_hr_custody" model="ir.actions.act_window">
         <field name="name">Custody</field>
         <field name="res_model">hr.custody</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'search_default_received': 1}</field>
     </record>
 
